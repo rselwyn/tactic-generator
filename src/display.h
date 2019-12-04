@@ -19,17 +19,22 @@ static const std::string kLight = "#f0d8b5";
 static const std::string kWindowTitle = "Chess Tactic Explorer";
 
 // Dimensions
-static const int kCellWidth = 40;
-static const int kNonBoardWidth = 200;
+static const double kCellWidth = 60;
+static const int kNonBoardWidth = 300;
+
+// Piece Image Loading
+
+static const std::string kPiecePath = "images/pieces/";
+static const std::string kSuffix = ".png";
+static const double kPercentOfCell = .90;
 
 class display : private GWindow {
 
     public:
         display();
+        void ShowBoard(board *b);
     private:
         void DisplayCells();
-        void ShowBoard(board *b);
-
 };
 
 #endif // DISPLAY_H

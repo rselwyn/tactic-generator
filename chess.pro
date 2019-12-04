@@ -233,12 +233,14 @@ DISTFILES = ""
 HEADERS *= "" \
     src/board.h \
     src/display.h \
-    src/eval.h
+    src/eval.h \
+    src/game.h
 HEADERS = ""
 SOURCES *= "" \
     src/board.cpp \
     src/display.cpp \
-    src/eval.cpp
+    src/eval.cpp \
+    src/game.cpp
 SOURCES = ""
 
 # include various source .cpp files and header .h files in the build process
