@@ -23,7 +23,7 @@ double engine::evalb(board *b) {
         for (int num = 0; num < 8; num++) {
             board::piece p = b->get(let, num);
             if (p.iswhite) {
-                if (p.piece == board::PAWN) white += PAWN_VALUE;
+                if (p.piece == board::PAWN) white += PAWN_VALUE + PAWN_AT_POSITION_VALUES[num][let%4];
                 if (p.piece == board::KNIGHT) white += KNIGHT_VALUE + KNIGHT_AT_POSITION_VALUES[num][let%4];
                 if (p.piece == board::BISHOP) white += BISHOP_VALUE + BISHOP_AT_POSITION_VALUES[num][let%4];
                 if (p.piece == board::ROOK) white += ROOK_VALUE + ROOK_AT_POSITION_VALUES[num][let%4];
@@ -32,7 +32,7 @@ double engine::evalb(board *b) {
             }
             else {
                 // The constant arrays are white-oriented, so we must convert the black coordinates so that we get the right value.
-                if (p.piece == board::PAWN) black += PAWN_VALUE;
+                if (p.piece == board::PAWN) black += PAWN_VALUE + PAWN_AT_POSITION_VALUES[7-num][let%4];
                 if (p.piece == board::KNIGHT) black += KNIGHT_VALUE + KNIGHT_AT_POSITION_VALUES[7-num][let%4];
                 if (p.piece == board::BISHOP) black += BISHOP_VALUE + BISHOP_AT_POSITION_VALUES[7-num][let%4];
                 if (p.piece == board::ROOK) black += ROOK_VALUE + ROOK_AT_POSITION_VALUES[7-num][let%4];
@@ -41,8 +41,6 @@ double engine::evalb(board *b) {
             }
         }
     }
-    std::cout << "White " << white << std::endl;
-    std::cout << "Black " << black << std::endl;
     return white - black;
 }
 
@@ -54,7 +52,8 @@ engine::moveoption engine::bestmove(board* b) {
     for (board::move cm : moves) {
         board *copy = new board;
         *copy = *b;
-        double eval = minimax(copy, NOMINAL_MAX_DEPTH, true, -1000000, 1000000);
+        copy->MakeMove(cm);
+        double eval = minimax(copy, NOMINAL_MAX_DEPTH - 1, true, -1000000, 1000000);
         if (eval > topValue) {
             topValue = eval;
             topMove = cm;

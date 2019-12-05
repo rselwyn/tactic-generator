@@ -3,9 +3,6 @@
 
 #include "board.h"
 
-const int NOMINAL_MAX_DEPTH = 10;
-
-
 class engine {
     public:
 

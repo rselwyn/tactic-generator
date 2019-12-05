@@ -30,10 +30,13 @@ public:
     struct move {
         // s = start, d = dest
         int s1; int s2; int d1; int d2; piece p; bool isCastle;
+        std::string toString() {
+            return ((char) ('a' + s1)) + std::to_string((s2+1)) + ((char) ('a' + d1)) + std::to_string(d2+1) + ")";
+        }
     };
 
     friend bool operator<(const move &a, const move &b) {
-        return (1000*a.d1 + 100*a.d2+10*b.s1 + b.s2) < (1000*b.d1 + 100 * b.d2 + 10*b.s1 + b.s2);
+        return (1000*a.d1 + 100*a.d2+10*a.s1 + a.s2) < (1000*b.d1 + 100 * b.d2 + 10*b.s1 + b.s2);
     }
 
     friend bool operator<(const piece &a, const piece &b) {
@@ -45,6 +48,7 @@ public:
     ~board();
 
     std::set<move> PossibleMoves();
+
     piece MakeMove(move m);
     void ToString();
     piece get(int row, int col);
@@ -57,12 +61,17 @@ public:
 private:
     piece _board[8][8]; // ["a-h"]["1-8"] relative to PGN
 
+    std::set<move> PossibleMovesWithColor();
+
     std::set<board::move> pawnMove(int let, int num, bool isWhite);
     std::set<board::move> knightMove(int let, int num, bool isWhite);
     std::set<board::move> bishopMove(int let, int num, bool isWhite);
     std::set<board::move> kingMove(int let, int num, bool isWhite, bool canCastle);
     std::set<board::move> queenMove(int let, int num, bool isWhite);
     std::set<board::move> rookMove(int let, int num, bool isWhite);
+
+    bool confirmKingMove(bool isWhite, board::move mo);
+
 
     bool inBounds(int let, int num);
 

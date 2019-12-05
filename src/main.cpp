@@ -11,17 +11,19 @@ int main() {
     display d;
     engine e;
     board *b = new board;
-    b->MakeMove({3, 1, 3, 3, {true, board::ptype::PAWN}, false});
-    b->MakeMove({4, 1, 4, 3, {true, board::ptype::PAWN}, false});
-    b->MakeMove({2, 0, 5, 3, {true, board::ptype::BISHOP}, false});
+//    b->MakeMove({3, 1, 3, 3, {true, board::ptype::PAWN}, false});
+//    b->MakeMove({4, 1, 4, 3, {true, board::ptype::PAWN}, false});
+//    b->MakeMove({2, 0, 5, 3, {true, board::ptype::BISHOP}, false});
+    //    for (board::move s : moves) {
+    //    }
+
 
     d.ShowBoard(b);
-    cout << "Evaluation " << e.evalb(b) << endl;
+    cout << "Evaluation: " << e.evalb(b) << endl;
     std::set<board::move> moves = b->PossibleMoves();
-
-    for (board::move s : moves) {
-        cout << "(" << ((char) ('a' + s.s1)) << (s.s2+1) << " " << ((char) ('a' + (s.d1))) << (s.d2+1) << ")"  << endl;
-    }
+    engine::moveoption move = e.bestmove(b);
+    cout << "Best Move: ";
+    cout << move.m.toString() << " with value " << move.evaluation << endl;
 
     while(true) {
         string s = getLine();

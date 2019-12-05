@@ -28,6 +28,13 @@ static const std::string kPiecePath = "images/pieces/";
 static const std::string kSuffix = ".png";
 static const double kPercentOfCell = .90;
 
+// Text
+
+static const std::string kTextColor = "#000000";
+static const std::string kHeader = "Courier-BOLD-21";
+static const std::string kPlain = "Courier-PLAIN-12";
+static const std::string kBold  = "Courier-BOLD-12";
+
 class display : private GWindow {
 
     public:
@@ -37,6 +44,7 @@ class display : private GWindow {
     private:
         std::map<board::piece, GImage*> imageStorage;
         void DisplayCells();
+        void DisplaySidebar();
 };
 
 #endif // DISPLAY_H

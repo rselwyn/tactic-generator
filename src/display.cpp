@@ -7,6 +7,7 @@ display::display() : GWindow(kCellWidth * BOARD_CELLS + kNonBoardWidth, kCellWid
     setWindowTitle(kWindowTitle);
     setAutoRepaint(false);
     DisplayCells();
+    DisplaySidebar();
     repaint();
 }
 
@@ -50,5 +51,16 @@ void display::ShowBoard(board *b) {
             draw(img);
         }
     }
+    repaint();
+}
+
+void display::DisplaySidebar() {
+    GText header("Chess Tactics Explorer");
+    header.setFont(kHeader);
+    header.setX(7 * kCellWidth + kNonBoardWidth/4);
+    header.setY(30);
+    header.setColor(kTextColor);
+    draw(header);
+
     repaint();
 }

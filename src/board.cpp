@@ -74,17 +74,22 @@ bool board::inBounds(int let, int num) {
 }
 
 std::set<board::move> board::PossibleMoves() {
+    return PossibleMovesWithColor();
+}
+
+std::set<board::move> board::PossibleMovesWithColor() {
     set<board::move> moves;
     for (int let = 0; let < 8; let++) {
         for (int num = 0; num < 8; num++) {
             piece p = _board[let][num];
+            if (p.iswhite != !sideToMove) continue;
             set<board::move> piecemoves;
-//            if (p.piece == PAWN) piecemoves = pawnMove(let, num, p.iswhite);
-//            if (p.piece == KNIGHT) piecemoves = knightMove(let, num, p.iswhite);
-//            if (p.piece == BISHOP) piecemoves = bishopMove(let, num, p.iswhite);
+            if (p.piece == PAWN) piecemoves = pawnMove(let, num, p.iswhite);
+            if (p.piece == KNIGHT) piecemoves = knightMove(let, num, p.iswhite);
+            if (p.piece == BISHOP) piecemoves = bishopMove(let, num, p.iswhite);
             if (p.piece == KING) piecemoves = kingMove(let, num, p.iswhite, p.iswhite ? canWhiteCastle : canBlackCastle);
-//            if (p.piece == QUEEN) piecemoves = queenMove(let, num, p.iswhite);
-//            if (p.piece == ROOK) piecemoves = rookMove(let, num, p.iswhite);
+            if (p.piece == QUEEN) piecemoves = queenMove(let, num, p.iswhite);
+            if (p.piece == ROOK) piecemoves = rookMove(let, num, p.iswhite);
             moves.insert(piecemoves.begin(), piecemoves.end());
         }
     }
@@ -96,9 +101,6 @@ std::set<board::move> board::pawnMove(int let, int num, bool isWhite) {
     set<board::move> ret;
     if (inBounds(let, num + wd) && _board[let][num+wd].piece == EMPTY) ret.insert({let,num,let,num+wd,{isWhite, PAWN}, false});
 
-    cout << "pawN" << endl;
-    cout << ((num == 1 && isWhite) || (num == 6 && !isWhite));
-    cout << (_board[let][num+ 2*wd].piece == EMPTY && _board[let][num+1*wd].piece == EMPTY) << endl;
     // pawn moving up by 2 if it is on the second rank (which is 1 zero indexed)
     if (((num == 1 && isWhite) || (num == 6 && !isWhite)) &&
             _board[let][num+ 2*wd].piece == EMPTY && _board[let][num+1*wd].piece == EMPTY)
@@ -322,12 +324,12 @@ board::piece board::get(int row, int col) {
 }
 
 void board::ToString() {
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            string val = typeToStr[_board[i][j].piece];
-            if (_board[i][j].iswhite) cout << val[0];
+    for (int j = 0; j < 8; j++) {
+        for (int i = 0; i < 8; i++) {
+            string val = typeToStr[_board[i][7-j].piece];
+            if (_board[i][7-j].iswhite) cout << val[0];
             else {
-                cout << toupper(val[0]);
+                cout << ((char) toupper(val[0]));
             }
         }
         cout << endl;

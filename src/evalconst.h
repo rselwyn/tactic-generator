@@ -13,6 +13,8 @@ const double QUEEN_VALUE = 2538;
 const double ROOK_VALUE = 1276;
 const double KING_VALUE = 100000.0; // Effectively Infinity
 
+const int NOMINAL_MAX_DEPTH = 1;
+
 // Constants Sourced from the #1 chess engine in the world
 // which can be found at https://github.com/official-stockfish/Stockfish/blob/master/src/psqt.cpp#L41
 // These arrays are symmetric around the vertical line in the middle of the board
@@ -60,5 +62,14 @@ const double KING_AT_POSITION_VALUES[8][4] = {{271,327,270,192},
                                               {123,145,81,31},
                                               {88,120,65,33},
                                               {59,89,45,-1}};
+
+const double PAWN_AT_POSITION_VALUES[8][4] = {{0,0,0,0},
+                                              {13,26,26, -52},
+                                              {13,-13,-26,0},
+                                              {0,0,0,2},
+                                              {13,13,26,65},
+                                              {26,26,52,78},
+                                              {130,130,130,130},
+                                              {0,0,0,0}};
 
 #endif // EVALCONST_H
