@@ -61,6 +61,7 @@ engine::moveoption engine::bestmove(board* b) {
         }
         delete copy; // memory management
     }
+
     return {topValue, topMove};
 }
 
@@ -78,6 +79,7 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
             copy->MakeMove(option);
             bestValue = std::max(bestValue, minimax(copy, depth-1, alpha, beta, false));
             alpha = std::max(alpha, bestValue);
+            delete copy;
             if (alpha > beta) break;
         }
         return bestValue;
@@ -91,6 +93,7 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
             copy->MakeMove(option);
             bestValue = std::min(bestValue, minimax(copy, depth-1, alpha, beta, false));
             beta = std::min(beta, bestValue);
+            delete copy;
             if (beta > alpha) break;
         }
         return bestValue;

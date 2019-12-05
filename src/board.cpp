@@ -56,6 +56,10 @@ board::board(string fen) {
 //    }
 }
 
+board::~board() {
+
+}
+
 board::piece board::MakeMove(move m) {
     // This method is assumed to be called with a valid move...
     piece copy = _board[m.d1][m.d2];
@@ -75,24 +79,29 @@ std::set<board::move> board::PossibleMoves() {
         for (int num = 0; num < 8; num++) {
             piece p = _board[let][num];
             set<board::move> piecemoves;
-            if (p.piece == PAWN) piecemoves = pawnMove(let, num, p.iswhite);
-            if (p.piece == KNIGHT) piecemoves = knightMove(let, num, p.iswhite);
+//            if (p.piece == PAWN) piecemoves = pawnMove(let, num, p.iswhite);
+//            if (p.piece == KNIGHT) piecemoves = knightMove(let, num, p.iswhite);
             if (p.piece == BISHOP) piecemoves = bishopMove(let, num, p.iswhite);
-            if (p.piece == KING) piecemoves = kingMove(let, num, p.iswhite, p.iswhite ? canWhiteCastle : canBlackCastle);
-            if (p.piece == QUEEN) piecemoves = queenMove(let, num, p.iswhite);
-            if (p.piece == ROOK) piecemoves = rookMove(let, num, p.iswhite);
+//            if (p.piece == KING) piecemoves = kingMove(let, num, p.iswhite, p.iswhite ? canWhiteCastle : canBlackCastle);
+//            if (p.piece == QUEEN) piecemoves = queenMove(let, num, p.iswhite);
+//            if (p.piece == ROOK) piecemoves = rookMove(let, num, p.iswhite);
+            moves.insert(piecemoves.begin(), piecemoves.end());
         }
     }
-    return {};
+    return moves;
 }
 
 std::set<board::move> board::pawnMove(int let, int num, bool isWhite) {
     int wd = isWhite ? 1 : -1; // pieces move forward when white and "backward" when black
     set<board::move> ret;
     if (inBounds(let, num + wd) && _board[let][num+wd].piece == EMPTY) ret.insert({let,num,let,num+wd,{isWhite, PAWN}, false});
+
+    cout << "pawN" << endl;
+    cout << ((num == 1 && isWhite) || (num == 6 && !isWhite));
+    cout << (_board[let][num+ 2*wd].piece == EMPTY && _board[let][num+1*wd].piece == EMPTY) << endl;
     // pawn moving up by 2 if it is on the second rank (which is 1 zero indexed)
     if (((num == 1 && isWhite) || (num == 6 && !isWhite)) &&
-            _board[let][num+2 * wd].piece == EMPTY && _board[let][num+2*wd].piece == EMPTY)
+            _board[let][num+ 2*wd].piece == EMPTY && _board[let][num+1*wd].piece == EMPTY)
         ret.insert({let,num,let,num+2*wd,{isWhite, PAWN}, false});
 
     // capture piece to the right
@@ -112,8 +121,9 @@ std::set<board::move> board::knightMove(int let, int num, bool isWhite) {
     std::vector<std::pair<int, int>> diffs = {{1,2}, {1, -2}, {-1, 2}, {-1, -2}, {2,1}, {2,-1}, {-2, 1}, {-2, -1}};
     for (std::pair<int, int> diff : diffs) {
         if (inBounds(let + diff.first, num + diff.second) &&
-                (_board[let+diff.first][num+diff.second].piece == EMPTY || (_board[let+diff.first][num+diff.second].piece != EMPTY && isWhite != _board[let+diff.first][num+diff.second].iswhite)))
+                (_board[let+diff.first][num+diff.second].piece == EMPTY || (_board[let+diff.first][num+diff.second].piece != EMPTY && isWhite != _board[let+diff.first][num+diff.second].iswhite))) {
             ret.insert({let,num,let+diff.first,num+diff.second,{isWhite, KNIGHT}, false});
+        }
     }
 
     return ret;
@@ -125,13 +135,12 @@ std::set<board::move> board::bishopMove(int let, int num, bool isWhite) {
     // NOTE:
     // Diagonal that looks like / and in the downward direction
 
-    for (int dcol = -7; dcol < 0; dcol++) {
+    for (int dcol = 1; dcol < 8; dcol++) {
         // Horizontal Moves Left
-        if (inBounds(let+dcol, num+dcol) && (_board[let+dcol][num+dcol].piece == EMPTY || (_board[let+dcol][num+dcol].piece != EMPTY && _board[let+dcol][num+dcol].iswhite != isWhite))) {
+        if (inBounds(let-dcol, num-dcol) && (_board[let-dcol][num-dcol].piece == EMPTY || (_board[let-dcol][num-dcol].piece != EMPTY && _board[let-dcol][num-dcol].iswhite != isWhite))) {
             // Check if the piece is in bounds, and that the square is either empty or an opposing piece
-            ret.insert({let, num, let+dcol, num+dcol, {isWhite, ROOK}, false});
-
-            if (_board[let+dcol][num+dcol].iswhite != isWhite) {
+            ret.insert({let, num, let-dcol, num-dcol, {isWhite, BISHOP}, false});
+            if (_board[let-dcol][num-dcol].iswhite != isWhite) {
                 // If it is an opposing piece, treat it as an obstruction and stop iterating
                 break;
             }
@@ -146,8 +155,7 @@ std::set<board::move> board::bishopMove(int let, int num, bool isWhite) {
         // Horizontal Moves Left
         if (inBounds(let+dcol, num+dcol) && (_board[let+dcol][num+dcol].piece == EMPTY || (_board[let+dcol][num+dcol].piece != EMPTY && _board[let+dcol][num+dcol].iswhite != isWhite))) {
             // Check if the piece is in bounds, and that the square is either empty or an opposing piece
-            ret.insert({let, num, let+dcol, num+dcol, {isWhite, ROOK}, false});
-
+            ret.insert({let, num, let+dcol, num+dcol, {isWhite, BISHOP}, false});
             if (_board[let+dcol][num+dcol].iswhite != isWhite) {
                 // If it is an opposing piece, treat it as an obstruction and stop iterating
                 break;
@@ -161,11 +169,10 @@ std::set<board::move> board::bishopMove(int let, int num, bool isWhite) {
     // NOTE:
     // Diagonal that looks like \ in the upward direction
 
-    for (int drow = -7; drow < 0; drow++) {
+    for (int drow = 1; drow < 8; drow++) {
         if (inBounds(let-drow, num+drow) && (_board[let-drow][num+drow].piece == EMPTY || (_board[let-drow][num+drow].piece != EMPTY && _board[let-drow][num+drow].iswhite != isWhite))) {
             // Check if the piece is in bounds, and that the square is either empty or an opposing piece
-            ret.insert({let, num, let-drow, num+drow, {isWhite, ROOK}, false});
-
+            ret.insert({let, num, let-drow, num+drow, {isWhite, BISHOP}, false});
             if (_board[let-drow][num+drow].iswhite != isWhite) {
                 // If it is an opposing piece, treat it as an obstruction and stop iterating
                 break;
@@ -176,12 +183,14 @@ std::set<board::move> board::bishopMove(int let, int num, bool isWhite) {
         }
     }
 
-    for (int drow = 0; drow < 8; drow++) {
-        if (inBounds(let-drow, num+drow) && (_board[let-drow][num+drow].piece == EMPTY || (_board[let-drow][num+drow].piece != EMPTY && _board[let-drow][num+drow].iswhite != isWhite))) {
-            // Check if the piece is in bounds, and that the square is either empty or an opposing piece
-            ret.insert({let, num, let-drow, num+drow, {isWhite, ROOK}, false});
+    // downward direction on the line \
 
-            if (_board[let-drow][num+drow].iswhite != isWhite) {
+    for (int drow = 1; drow < 8; drow++) {
+        if (inBounds(let+drow, num-drow) && (_board[let+drow][num-drow].piece == EMPTY || (_board[let+drow][num-drow].piece != EMPTY && _board[let+drow][num-drow].iswhite != isWhite))) {
+            // Check if the piece is in bounds, and that the square is either empty or an opposing piece
+            ret.insert({let, num, let+drow, num-drow, {isWhite, BISHOP}, false});
+
+            if (_board[let+drow][num-drow].iswhite != isWhite) {
                 // If it is an opposing piece, treat it as an obstruction and stop iterating
                 break;
             }

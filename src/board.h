@@ -33,7 +33,7 @@ public:
     };
 
     friend bool operator<(const move &a, const move &b) {
-        return a.d1 < b.d1;
+        return (1000*a.d1 + 100*a.d2+10*b.s1 + b.s2) < (1000*b.d1 + 100 * b.d2 + 10*b.s1 + b.s2);
     }
 
     friend bool operator<(const piece &a, const piece &b) {
