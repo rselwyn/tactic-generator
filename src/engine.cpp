@@ -73,13 +73,26 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
         double bestValue = -10000000;
         std::set<board::move> moves = b->PossibleMoves();
         for (board::move option : moves) {
-            board copy = *b;
-
-            bestValue = std::max(bestValue, minimax(child, depth-1, alpha, beta, false));
-
+            board *copy = new board;
+            *copy = *b;
+            copy->MakeMove(option);
+            bestValue = std::max(bestValue, minimax(copy, depth-1, alpha, beta, false));
+            alpha = std::max(alpha, bestValue);
+            if (alpha > beta) break;
         }
+        return bestValue;
     }
     else {
-
+        double bestValue = 10000000;
+        std::set<board::move> moves = b->PossibleMoves();
+        for (board::move option : moves) {
+            board *copy = new board;
+            *copy = *b;
+            copy->MakeMove(option);
+            bestValue = std::min(bestValue, minimax(copy, depth-1, alpha, beta, false));
+            beta = std::min(beta, bestValue);
+            if (beta > alpha) break;
+        }
+        return bestValue;
     }
 }
