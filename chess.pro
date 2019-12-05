@@ -233,13 +233,14 @@ DISTFILES = ""
 HEADERS *= "" \
     src/board.h \
     src/display.h \
-    src/eval.h \
+    src/engine.h \
+    src/evalconst.h \
     src/game.h
 HEADERS = ""
 SOURCES *= "" \
     src/board.cpp \
     src/display.cpp \
-    src/eval.cpp \
+    src/engine.cpp \
     src/game.cpp
 SOURCES = ""
 

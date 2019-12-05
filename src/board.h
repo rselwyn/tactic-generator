@@ -36,6 +36,10 @@ public:
         return a.d1 < b.d1;
     }
 
+    friend bool operator<(const piece &a, const piece &b) {
+        return (2*a.piece + a.iswhite) < (2*b.piece + b.iswhite);
+    }
+
     board(); // construct a default chess board
     board(std::string fen); // construct board from FEN notation
     ~board();
@@ -46,11 +50,12 @@ public:
     piece get(int row, int col);
     std::map<ptype, std::string> typeToStr = {{PAWN, "p"}, {KNIGHT, "n"}, {BISHOP, "b"}, {KING, "k"}, {QUEEN, "q"}, {EMPTY, " "}, {ROOK, "r"}};
 
-private:
-    piece _board[8][8]; // ["a-h"]["1-8"] relative to PGN
     bool canWhiteCastle = true;
     bool canBlackCastle = true;
     bool sideToMove = false; // False is white, True is black
+
+private:
+    piece _board[8][8]; // ["a-h"]["1-8"] relative to PGN
 
     std::set<board::move> pawnMove(int let, int num, bool isWhite);
     std::set<board::move> knightMove(int let, int num, bool isWhite);

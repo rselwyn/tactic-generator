@@ -32,8 +32,10 @@ class display : private GWindow {
 
     public:
         display();
+        ~display();
         void ShowBoard(board *b);
     private:
+        std::map<board::piece, GImage*> imageStorage;
         void DisplayCells();
 };
 

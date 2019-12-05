@@ -61,6 +61,7 @@ board::piece board::MakeMove(move m) {
     piece copy = _board[m.d1][m.d2];
     _board[m.d1][m.d2] = _board[m.s1][m.s2];
     _board[m.s1][m.s2].piece = EMPTY;
+    sideToMove = !sideToMove;
     return copy;
 }
 

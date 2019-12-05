@@ -5,8 +5,13 @@
 display::display() : GWindow(kCellWidth * BOARD_CELLS + kNonBoardWidth, kCellWidth * BOARD_CELLS)
 {
     setWindowTitle(kWindowTitle);
+    setAutoRepaint(false);
     DisplayCells();
     repaint();
+}
+
+display::~display() {
+
 }
 
 void display::DisplayCells() {
@@ -18,16 +23,28 @@ void display::DisplayCells() {
             draw(rect);
         }
     }
+    repaint();
 }
 
 void display::ShowBoard(board *b) {
+    DisplayCells();
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
             board::piece p = b->get(row, 7-col);
             if (p.piece == board::EMPTY) continue;
             std::string path = kPiecePath + (p.iswhite ? "w" : "b") + b->typeToStr[p.piece] + kSuffix;
-            GImage *img = new GImage(path);
-            img->setSize(kCellWidth * kPercentOfCell, kCellWidth * kPercentOfCell);
+            // Don't reallocate images if we don't need to
+            GImage *img;
+            if (imageStorage.count(p) != 0) {
+                img = imageStorage[p];
+            }
+            else {
+                img = new GImage(path);
+                img->setSize(kCellWidth * kPercentOfCell, kCellWidth * kPercentOfCell);
+                img->setX(0);
+                img->setY(0);
+                imageStorage[p] = img;
+            }
             img->setX(row * kCellWidth + kCellWidth * (1-kPercentOfCell) / 2 );
             img->setY(col * kCellWidth + kCellWidth * (1-kPercentOfCell) / 2 );
             draw(img);
