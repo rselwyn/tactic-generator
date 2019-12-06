@@ -49,10 +49,7 @@ engine::moveoption engine::bestmove(board* b) {
         board *copy = new board;
         *copy = *b;
         copy->MakeMove(cm);
-//        copy->ToString();
-        std::cout << cm.toString() << std::endl;
         double eval = minimax(copy, NOMINAL_MAX_DEPTH - 1, true, -1000000, 1000000);
-        std::cout << eval << std::endl;
         if ((eval < topValue && whiteMove)
                 || (eval > topValue && !whiteMove)) {
             topValue = eval;
@@ -82,7 +79,9 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
             bestValue = std::max(bestValue, minimax(copy, depth-1, !isMax, alpha, beta));
             alpha = std::max(alpha, bestValue);
             delete copy;
-            if (alpha > beta) break;
+            if (alpha > beta) {
+                break;
+            }
         }
         return bestValue;
     }
@@ -96,7 +95,9 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
             bestValue = std::min(bestValue, minimax(copy, depth-1, !isMax, alpha, beta));
             beta = std::min(beta, bestValue);
             delete copy;
-            if (beta < alpha) break;
+            if (beta < alpha) {
+                break;
+            }
         }
         return bestValue;
     }

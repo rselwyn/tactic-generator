@@ -26,11 +26,13 @@ int main() {
     cout << move.m.toString() << " with value " << move.evaluation << endl;
 
     while(true) {
+        std::set<board::move> mo = b->PossibleMoves();
+        for (board::move s : mo) {
+            cout << "Possibility " <<  s.toString() << endl;
+        }
         string s = getLine();
-//        cout << s << endl;
         b->MakeMove(s);
         d.ShowBoard(b);
-
 
         cout << "Evaluation: " << engine::evalb(b) << endl;
         std::set<board::move> moves = b->PossibleMoves();
