@@ -2,6 +2,8 @@
 #include "evalconst.h"
 #include "board.h"
 #include <iostream>
+#include <chrono>
+
 #include "stdio.h"
 
 // Citations: In constructing this class, I referenced a few sources on the implementation of a Chess AI and on the Minimax Algorithm (with A/B pruning)
@@ -9,8 +11,11 @@
 // https://en.wikipedia.org/wiki/Alpha–beta_pruning#Core_idea
 // https://en.wikipedia.org/wiki/Minimax
 
+double engine::kConsidered = 0;
+
 // Positive evaluation is an advantage for white
 double engine::evalb(board *b) {
+
     double white = 0;
     double black = 0;
 
@@ -36,10 +41,14 @@ double engine::evalb(board *b) {
             }
         }
     }
+
+
     return white - black;
 }
 
 engine::moveoption engine::bestmove(board* b) {
+    auto start = std::chrono::high_resolution_clock::now();
+
     std::set<board::move> moves = b->PossibleMoves();
     bool whiteMove = b->sideToMove;
     double topValue = whiteMove ? 10000000 : -10000000;
@@ -55,16 +64,19 @@ engine::moveoption engine::bestmove(board* b) {
             topValue = eval;
             topMove = cm;
         }
-        else {
-
-        }
         delete copy; // memory management
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    std::cout << "Time taken by function: "
+             << duration.count() << " microseconds" << std::endl;
 
     return {topValue, topMove};
 }
 
 double engine::minimax(board* b, int depth, bool isMax, double alpha, double beta) {
+    engine::kConsidered += 1.0;
     if (depth == 0) {
         return evalb(b);
     }
@@ -73,12 +85,10 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
         double bestValue = -10000000;
         std::set<board::move> moves = b->PossibleMoves();
         for (board::move option : moves) {
-            board *copy = new board;
-            *copy = *b;
-            copy->MakeMove(option);
-            bestValue = std::max(bestValue, minimax(copy, depth-1, !isMax, alpha, beta));
+            b->MakeMove(option);
+            bestValue = std::max(bestValue, minimax(b, depth-1, !isMax, alpha, beta));
             alpha = std::max(alpha, bestValue);
-            delete copy;
+            b->UndoLast();
             if (alpha > beta) {
                 break;
             }
@@ -89,12 +99,10 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
         double bestValue = 10000000;
         std::set<board::move> moves = b->PossibleMoves();
         for (board::move option : moves) {
-            board *copy = new board;
-            *copy = *b;
-            copy->MakeMove(option);
-            bestValue = std::min(bestValue, minimax(copy, depth-1, !isMax, alpha, beta));
+            b->MakeMove(option);
+            bestValue = std::min(bestValue, minimax(b, depth-1, !isMax, alpha, beta));
             beta = std::min(beta, bestValue);
-            delete copy;
+            b->UndoLast();
             if (beta < alpha) {
                 break;
             }

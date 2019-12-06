@@ -10,7 +10,7 @@ using namespace std;
 int main() {
     display d;
     board *b = new board;
-
+    d.ShowBoard(b);
 //    b->MakeMove({0, 6, 0, 5, {true, board::ptype::PAWN}, false});
 
 //    d.ShowBoard(b);
@@ -20,32 +20,22 @@ int main() {
 //    getLine();
 //    d.ShowBoard(b);
 
-    cout << "Evaluation: " << engine::evalb(b) << endl;
-    std::set<board::move> moves = b->PossibleMoves();
-    for (board::move s : moves) {
-        cout << s.toString() << endl;
-    }
-
-    engine::moveoption move = engine::bestmove(b);
-    cout << "Best Move: ";
-    cout << move.m.toString() << " with value " << move.evaluation << endl;
-
     while(true) {
-        std::set<board::move> mo = b->PossibleMoves();
-        for (board::move s : mo) {
-            cout << "Possibility " <<  s.toString() << endl;
-        }
         string s = getLine();
         b->MakeMove(s);
         d.ShowBoard(b);
 
+        engine::kConsidered = 0;
         cout << "Evaluation: " << engine::evalb(b) << endl;
         std::set<board::move> moves = b->PossibleMoves();
         engine::moveoption move = engine::bestmove(b);
+        cout << "Nodes: " << engine::kConsidered << endl;
+
         cout << "Best Move: ";
         cout << move.m.toString() << " with value " << move.evaluation << endl;
         b->MakeMove(move.m);
         d.ShowBoard(b);
+        engine::kConsidered = 0;
     }
     return 0;
 }

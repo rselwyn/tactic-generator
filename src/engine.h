@@ -3,8 +3,10 @@
 
 #include "board.h"
 
+
 class engine {
     public:
+        static double kConsidered;
 
         struct moveoption {
             double evaluation;

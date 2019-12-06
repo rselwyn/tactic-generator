@@ -500,7 +500,7 @@ CONFIG(debug, debug|release) {
 
 # make 'release' target be statically linked so it is a stand-alone executable
 CONFIG(release, debug|release) {
-    QMAKE_CXXFLAGS += -O2
+    QMAKE_CXXFLAGS += -O3
     macx {
         QMAKE_POST_LINK += 'macdeployqt $${OUT_PWD}/$${TARGET}.app'
         #QMAKE_POST_LINK += 'macdeployqt $${OUT_PWD}/$${TARGET}.app && rm $${OUT_PWD}/*.o && rm $${OUT_PWD}/Makefile'
