@@ -9,11 +9,6 @@
 // https://en.wikipedia.org/wiki/Alpha–beta_pruning#Core_idea
 // https://en.wikipedia.org/wiki/Minimax
 
-engine::engine()
-{
-
-}
-
 // Positive evaluation is an advantage for white
 double engine::evalb(board *b) {
     double white = 0;
@@ -23,21 +18,21 @@ double engine::evalb(board *b) {
         for (int num = 0; num < 8; num++) {
             board::piece p = b->get(let, num);
             if (p.iswhite) {
-                if (p.piece == board::PAWN) white += PAWN_VALUE + PAWN_AT_POSITION_VALUES[num][let%4];
-                if (p.piece == board::KNIGHT) white += KNIGHT_VALUE + KNIGHT_AT_POSITION_VALUES[num][let%4];
-                if (p.piece == board::BISHOP) white += BISHOP_VALUE + BISHOP_AT_POSITION_VALUES[num][let%4];
-                if (p.piece == board::ROOK) white += ROOK_VALUE + ROOK_AT_POSITION_VALUES[num][let%4];
-                if (p.piece == board::QUEEN) white += QUEEN_VALUE + QUEEN_AT_POSITION_VALUES[num][let%4];
-                if (p.piece == board::KING) white += KING_VALUE + KING_AT_POSITION_VALUES[num][let%4];
+                if (p.piece == board::PAWN) white += PAWN_VALUE + PAWN_AT_POSITION_VALUES[num][let < 4 ? let : 7-let];
+                if (p.piece == board::KNIGHT) white += KNIGHT_VALUE + KNIGHT_AT_POSITION_VALUES[num][let < 4 ? let : 7-let];
+                if (p.piece == board::BISHOP) white += BISHOP_VALUE + BISHOP_AT_POSITION_VALUES[num][let < 4 ? let : 7-let];
+                if (p.piece == board::ROOK) white += ROOK_VALUE + ROOK_AT_POSITION_VALUES[num][let < 4 ? let : 7-let];
+                if (p.piece == board::QUEEN) white += QUEEN_VALUE + QUEEN_AT_POSITION_VALUES[num][let < 4 ? let : 7-let];
+                if (p.piece == board::KING) white += KING_VALUE + KING_AT_POSITION_VALUES[num][let < 4 ? let : 7-let];
             }
             else {
                 // The constant arrays are white-oriented, so we must convert the black coordinates so that we get the right value.
-                if (p.piece == board::PAWN) black += PAWN_VALUE + PAWN_AT_POSITION_VALUES[7-num][let%4];
-                if (p.piece == board::KNIGHT) black += KNIGHT_VALUE + KNIGHT_AT_POSITION_VALUES[7-num][let%4];
-                if (p.piece == board::BISHOP) black += BISHOP_VALUE + BISHOP_AT_POSITION_VALUES[7-num][let%4];
-                if (p.piece == board::ROOK) black += ROOK_VALUE + ROOK_AT_POSITION_VALUES[7-num][let%4];
-                if (p.piece == board::QUEEN) black += QUEEN_VALUE + QUEEN_AT_POSITION_VALUES[7-num][let%4];
-                if (p.piece == board::KING) black += KING_VALUE + KING_AT_POSITION_VALUES[7-num][let%4];
+                if (p.piece == board::PAWN) black += PAWN_VALUE + PAWN_AT_POSITION_VALUES[7-num][let < 4 ? let : 7-let];
+                if (p.piece == board::KNIGHT) black += KNIGHT_VALUE + KNIGHT_AT_POSITION_VALUES[7-num][let < 4 ? let : 7-let];
+                if (p.piece == board::BISHOP) black += BISHOP_VALUE + BISHOP_AT_POSITION_VALUES[7-num][let < 4 ? let : 7-let];
+                if (p.piece == board::ROOK) black += ROOK_VALUE + ROOK_AT_POSITION_VALUES[7-num][let < 4 ? let : 7-let];
+                if (p.piece == board::QUEEN) black += QUEEN_VALUE + QUEEN_AT_POSITION_VALUES[7-num][let < 4 ? let : 7-let];
+                if (p.piece == board::KING) black += KING_VALUE + KING_AT_POSITION_VALUES[7-num][let < 4 ? let : 7-let];
             }
         }
     }
@@ -46,17 +41,25 @@ double engine::evalb(board *b) {
 
 engine::moveoption engine::bestmove(board* b) {
     std::set<board::move> moves = b->PossibleMoves();
-    double topValue = -10000000;
+    bool whiteMove = b->sideToMove;
+    double topValue = whiteMove ? 10000000 : -10000000;
     board::move topMove;
 
     for (board::move cm : moves) {
         board *copy = new board;
         *copy = *b;
         copy->MakeMove(cm);
+//        copy->ToString();
+        std::cout << cm.toString() << std::endl;
         double eval = minimax(copy, NOMINAL_MAX_DEPTH - 1, true, -1000000, 1000000);
-        if (eval > topValue) {
+        std::cout << eval << std::endl;
+        if ((eval < topValue && whiteMove)
+                || (eval > topValue && !whiteMove)) {
             topValue = eval;
             topMove = cm;
+        }
+        else {
+
         }
         delete copy; // memory management
     }
@@ -76,7 +79,7 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
             board *copy = new board;
             *copy = *b;
             copy->MakeMove(option);
-            bestValue = std::max(bestValue, minimax(copy, depth-1, alpha, beta, false));
+            bestValue = std::max(bestValue, minimax(copy, depth-1, !isMax, alpha, beta));
             alpha = std::max(alpha, bestValue);
             delete copy;
             if (alpha > beta) break;
@@ -90,10 +93,10 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
             board *copy = new board;
             *copy = *b;
             copy->MakeMove(option);
-            bestValue = std::min(bestValue, minimax(copy, depth-1, alpha, beta, false));
+            bestValue = std::min(bestValue, minimax(copy, depth-1, !isMax, alpha, beta));
             beta = std::min(beta, bestValue);
             delete copy;
-            if (beta > alpha) break;
+            if (beta < alpha) break;
         }
         return bestValue;
     }

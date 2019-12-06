@@ -9,27 +9,36 @@ using namespace std;
 
 int main() {
     display d;
-    engine e;
     board *b = new board;
-//    b->MakeMove({3, 1, 3, 3, {true, board::ptype::PAWN}, false});
-//    b->MakeMove({4, 1, 4, 3, {true, board::ptype::PAWN}, false});
-//    b->MakeMove({2, 0, 5, 3, {true, board::ptype::BISHOP}, false});
-    //    for (board::move s : moves) {
-    //    }
 
+//    b->MakeMove({3, 0, 3, 2, {true, board::ptype::QUEEN}, false});
+//    b->MakeMove({0, 6, 0, 5, {true, board::ptype::PAWN}, false});
 
     d.ShowBoard(b);
-    cout << "Evaluation: " << e.evalb(b) << endl;
+    cout << "Evaluation: " << engine::evalb(b) << endl;
     std::set<board::move> moves = b->PossibleMoves();
-    engine::moveoption move = e.bestmove(b);
+    for (board::move s : moves) {
+        cout << s.toString() << endl;
+    }
+
+    engine::moveoption move = engine::bestmove(b);
     cout << "Best Move: ";
     cout << move.m.toString() << " with value " << move.evaluation << endl;
 
     while(true) {
         string s = getLine();
-        cout << s << endl;
+//        cout << s << endl;
+        b->MakeMove(s);
         d.ShowBoard(b);
-        cout << "Evaluation " << e.evalb(b) << endl;
+
+
+        cout << "Evaluation: " << engine::evalb(b) << endl;
+        std::set<board::move> moves = b->PossibleMoves();
+        engine::moveoption move = engine::bestmove(b);
+        cout << "Best Move: ";
+        cout << move.m.toString() << " with value " << move.evaluation << endl;
+        b->MakeMove(move.m);
+        d.ShowBoard(b);
     }
     return 0;
 }

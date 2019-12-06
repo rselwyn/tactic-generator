@@ -69,6 +69,15 @@ board::piece board::MakeMove(move m) {
     return copy;
 }
 
+board::piece board::MakeMove(std::string m) {
+    // This method is assumed to be called with a valid move...
+    piece copy = _board[m[2]-'a'][m[3]-'1'];
+    _board[m[2]-'a'][m[3]-'1'] = _board[m[0] - 'a'][m[1] - '1'];
+    _board[m[0]-'a'][m[1]-'1'].piece = EMPTY;
+    sideToMove = !sideToMove;
+    return copy;
+}
+
 bool board::inBounds(int let, int num) {
     return 0 <= let && let < 8 && num >= 0 && num < 8;
 }

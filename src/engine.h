@@ -11,12 +11,11 @@ class engine {
             board::move m;
         };
 
-        engine();
-        double evalb(board* b);
+        static double evalb(board* b);
 
-        moveoption bestmove(board* b);
+        static moveoption bestmove(board* b);
         // Minimax with alpha-beta pruning
-        double minimax(board* b, int depth, bool isMax, double alpha, double beta);
+        static double minimax(board* b, int depth, bool isMax, double alpha, double beta);
 
     private:
 

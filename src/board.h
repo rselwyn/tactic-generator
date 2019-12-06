@@ -50,6 +50,8 @@ public:
     std::set<move> PossibleMoves();
 
     piece MakeMove(move m);
+    piece MakeMove(std::string m);
+
     void ToString();
     piece get(int row, int col);
     std::map<ptype, std::string> typeToStr = {{PAWN, "p"}, {KNIGHT, "n"}, {BISHOP, "b"}, {KING, "k"}, {QUEEN, "q"}, {EMPTY, " "}, {ROOK, "r"}};
@@ -71,7 +73,7 @@ private:
     std::set<board::move> rookMove(int let, int num, bool isWhite);
 
     bool confirmKingMove(bool isWhite, board::move mo);
-
+    bool isKingChecked();
 
     bool inBounds(int let, int num);
 
