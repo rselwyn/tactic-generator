@@ -65,7 +65,7 @@ public:
 private:
     piece _board[8][8]; // ["a-h"]["1-8"] relative to PGN
 
-    std::set<move> PossibleMovesWithColor();
+    std::set<move> PossibleMovesWithColor(bool includeKingMoves);
     std::stack<std::pair<move, piece>> performedMovesStack; // keeps track of captured pieces so that old moves can be replayed back
 
     std::set<board::move> pawnMove(int let, int num, bool isWhite);
@@ -75,7 +75,7 @@ private:
     std::set<board::move> queenMove(int let, int num, bool isWhite);
     std::set<board::move> rookMove(int let, int num, bool isWhite);
 
-    bool confirmKingMove(bool isWhite, board::move mo);
+    bool confirmNoKingProblems(bool isWhite, board::move mo);
 
     bool inBounds(int let, int num);
 

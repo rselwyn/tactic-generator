@@ -96,10 +96,12 @@ bool board::inBounds(int let, int num) {
 }
 
 std::set<board::move> board::PossibleMoves() {
-    return PossibleMovesWithColor();
+    return PossibleMovesWithColor(true);
 }
 
-std::set<board::move> board::PossibleMovesWithColor() {
+// Include king moves parameter makes it so that we can get all of the moves with the king moves
+// not included.
+std::set<board::move> board::PossibleMovesWithColor(bool includeKingMoves) {
     set<board::move> moves;
     for (int let = 0; let < 8; let++) {
         for (int num = 0; num < 8; num++) {
@@ -109,12 +111,19 @@ std::set<board::move> board::PossibleMovesWithColor() {
             if (p.piece == PAWN) piecemoves = pawnMove(let, num, p.iswhite);
             if (p.piece == KNIGHT) piecemoves = knightMove(let, num, p.iswhite);
             if (p.piece == BISHOP) piecemoves = bishopMove(let, num, p.iswhite);
-            if (p.piece == KING) piecemoves = kingMove(let, num, p.iswhite, p.iswhite ? canWhiteCastle : canBlackCastle);
+            if (p.piece == KING && includeKingMoves) piecemoves = kingMove(let, num, p.iswhite, p.iswhite ? canWhiteCastle : canBlackCastle);
             if (p.piece == QUEEN) piecemoves = queenMove(let, num, p.iswhite);
             if (p.piece == ROOK) piecemoves = rookMove(let, num, p.iswhite);
             moves.insert(piecemoves.begin(), piecemoves.end());
         }
     }
+
+    set<board::move> valids;
+    for (move m : moves) {
+        if (confirmNoKingProblems(m.p.iswhite,m)) valids.insert(m);
+    }
+
+    if (valids.size() == 0) cout << "Checkmate on the board!" << endl;
     return moves;
 }
 
@@ -348,8 +357,30 @@ board::piece board::get(int row, int col) {
     return _board[row][col];
 }
 
-bool board::confirmKingMove(bool isWhite, board::move mo) {
-    return false;
+bool board::confirmNoKingProblems(bool isWhite, board::move mo) {
+    return true;
+    // Checks if the king would be "hanging" after a move
+    MakeMove(mo);
+
+    int let = 0; int num = 0;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j <8; j++) {
+            if (_board[i][j].piece == KING && _board[i][j].iswhite == isWhite) {
+                let = i;
+                num = j;
+            }
+        }
+    }
+
+    std::set<move> options = PossibleMovesWithColor(false);
+    for (move m : options) {
+        if (m.d1 == let && m.d2 == num) {
+            return false; // a.k.a there is a problem
+        }
+    }
+
+    UndoLast();
+    return true;
 }
 
 void board::ToString() {
