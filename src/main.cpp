@@ -11,10 +11,15 @@ int main() {
     display d;
     board *b = new board;
 
-//    b->MakeMove({3, 0, 3, 2, {true, board::ptype::QUEEN}, false});
 //    b->MakeMove({0, 6, 0, 5, {true, board::ptype::PAWN}, false});
 
-    d.ShowBoard(b);
+//    d.ShowBoard(b);
+//    b->MakeMove({0, 1, 0, 6, {true, board::ptype::PAWN}, false});
+//    d.ShowBoard(b);
+//    b->UndoLast();
+//    getLine();
+//    d.ShowBoard(b);
+
     cout << "Evaluation: " << engine::evalb(b) << endl;
     std::set<board::move> moves = b->PossibleMoves();
     for (board::move s : moves) {

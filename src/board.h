@@ -4,6 +4,7 @@
 #include "stdlib.h"
 #include <string>
 #include <map>
+#include <stack>
 #include <set>
 
 
@@ -51,6 +52,7 @@ public:
 
     piece MakeMove(move m);
     piece MakeMove(std::string m);
+    void UndoLast();
 
     void ToString();
     piece get(int row, int col);
@@ -64,6 +66,7 @@ private:
     piece _board[8][8]; // ["a-h"]["1-8"] relative to PGN
 
     std::set<move> PossibleMovesWithColor();
+    std::stack<std::pair<move, piece>> performedMovesStack; // keeps track of captured pieces so that old moves can be replayed back
 
     std::set<board::move> pawnMove(int let, int num, bool isWhite);
     std::set<board::move> knightMove(int let, int num, bool isWhite);
@@ -73,7 +76,6 @@ private:
     std::set<board::move> rookMove(int let, int num, bool isWhite);
 
     bool confirmKingMove(bool isWhite, board::move mo);
-    bool isKingChecked();
 
     bool inBounds(int let, int num);
 

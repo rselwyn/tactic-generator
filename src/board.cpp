@@ -66,17 +66,30 @@ board::piece board::MakeMove(move m) {
     _board[m.d1][m.d2] = _board[m.s1][m.s2];
     _board[m.s1][m.s2].piece = EMPTY;
     sideToMove = !sideToMove;
+    performedMovesStack.push(std::make_pair(m, copy));
     return copy;
 }
 
 board::piece board::MakeMove(std::string m) {
     // This method is assumed to be called with a valid move...
     piece copy = _board[m[2]-'a'][m[3]-'1'];
-    _board[m[2]-'a'][m[3]-'1'] = _board[m[0] - 'a'][m[1] - '1'];
-    _board[m[0]-'a'][m[1]-'1'].piece = EMPTY;
-    sideToMove = !sideToMove;
-    return copy;
+    move mo = {m[0]-'a', m[1]-'1', m[2]-'a', m[3]-'1', copy, false};
+    return MakeMove(mo);
 }
+
+void board::UndoLast() {
+    if (performedMovesStack.empty()) {
+        cerr << "ERROR: Attempting to undo a non-existant move." << endl;
+        return;
+    }
+
+    std::pair<move, piece> lastMove = performedMovesStack.top();
+    performedMovesStack.pop();
+    sideToMove = !sideToMove;
+    _board[lastMove.first.s1][lastMove.first.s2] = lastMove.first.p;
+    _board[lastMove.first.d1][lastMove.first.d2] = lastMove.second;
+}
+
 
 bool board::inBounds(int let, int num) {
     return 0 <= let && let < 8 && num >= 0 && num < 8;
@@ -333,6 +346,10 @@ std::set<board::move> board::rookMove(int let, int num, bool isWhite) {
 
 board::piece board::get(int row, int col) {
     return _board[row][col];
+}
+
+bool board::confirmKingMove(bool isWhite, board::move mo) {
+    return false;
 }
 
 void board::ToString() {
