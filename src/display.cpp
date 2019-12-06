@@ -62,5 +62,6 @@ void display::DisplaySidebar() {
     header.setColor(kTextColor);
     draw(header);
 
+
     repaint();
 }

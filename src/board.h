@@ -48,7 +48,7 @@ public:
     board(std::string fen); // construct board from FEN notation
     ~board();
 
-    std::set<move> PossibleMoves();
+    std::vector<move> PossibleMoves();
 
     piece MakeMove(move m);
     piece MakeMove(std::string m);
@@ -62,10 +62,14 @@ public:
     bool canBlackCastle = true;
     bool sideToMove = false; // False is white, True is black
 
+    std::string ToHashString();
+
+
 private:
+
     piece _board[8][8]; // ["a-h"]["1-8"] relative to PGN
 
-    std::set<move> PossibleMovesWithColor(bool includeKingMoves);
+    std::vector<move> PossibleMovesWithColor(bool includeKingMoves);
     std::stack<std::pair<move, piece>> performedMovesStack; // keeps track of captured pieces so that old moves can be replayed back
 
     std::set<board::move> pawnMove(int let, int num, bool isWhite);

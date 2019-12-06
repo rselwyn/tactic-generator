@@ -3,7 +3,10 @@
 #include "board.h"
 #include "stdio.h"
 #include "string.h"
+#include "stdlib.h"
+#include "random.h"
 #include <vector>
+#include <deque>
 
 using namespace std;
 
@@ -36,24 +39,33 @@ board::board()
 
 board::board(string fen) {
 
-    int currentLetter = 0;
-    int currentRow = 0;
+    int currentLetter = -1;
+    int currentRow = 7;
 
     vector<char> validPieces = {'N','n','P','p','R','r','K','k','Q','q','B','b'};
     vector<piece> toPieces = {{true, KNIGHT}, {false, KNIGHT}, {true, PAWN}, {false, PAWN}, {true, ROOK}, {false, ROOK},
                              {true, KING}, {false, KING}, {true, QUEEN}, {false, QUEEN}, {true, BISHOP}, {false, BISHOP}};
 
-//    for (int i = 0; i < fen.length(); i++) {
-//        if (fen[i] == '/') {
-//            currentRow++;
-//            currentLetter = 0;
-//        }
-//        if (std::find(validPieces.begin(), validPieces.end(), fen[i]) != validPieces.end()) {
-//            // It is a valid piece
-//            _board[currentLetter][currentRow] = toPieces.at(std::find(validPieces.begin(), validPieces.end(), fen[i]) - validPieces.begin());
-//        }
-//        if ()
-//    }
+    for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++) _board[i][j] = {true, EMPTY};
+
+    for (int i = 0; i < fen.length(); i++) {
+        if (fen[i] == '/') {
+            currentRow--;
+            currentLetter = -1;
+        }
+        if (std::find(validPieces.begin(), validPieces.end(), fen[i]) != validPieces.end()) {
+            // It is a valid piece
+            currentLetter++;
+            cout << ((char) ('a'+currentLetter)) << (currentRow+1) << std::endl;
+            _board[currentLetter][currentRow] = toPieces.at(std::find(validPieces.begin(), validPieces.end(), fen[i]) - validPieces.begin());
+            cout << "add " << endl;
+        }
+        else {
+            if (isdigit(fen[i])) {
+                currentLetter+= (fen[i] - '0');
+            }
+        }
+    }
 }
 
 board::~board() {
@@ -95,16 +107,17 @@ bool board::inBounds(int let, int num) {
     return 0 <= let && let < 8 && num >= 0 && num < 8;
 }
 
-std::set<board::move> board::PossibleMoves() {
+std::vector<board::move> board::PossibleMoves() {
     return PossibleMovesWithColor(true);
 }
 
 // Include king moves parameter makes it so that we can get all of the moves with the king moves
 // not included.
-std::set<board::move> board::PossibleMovesWithColor(bool includeKingMoves) {
-    set<board::move> moves;
-    for (int let = 0; let < 8; let++) {
-        for (int num = 0; num < 8; num++) {
+std::vector<board::move> board::PossibleMovesWithColor(bool includeKingMoves) {
+    deque<board::move> moves;
+    vector<board::move> final;
+    for (int num = 0; num < 8; num++) {
+        for (int let = 0; let < 8; let++) {
             piece p = _board[let][num];
             if (p.iswhite != !sideToMove) continue;
             set<board::move> piecemoves;
@@ -114,17 +127,22 @@ std::set<board::move> board::PossibleMovesWithColor(bool includeKingMoves) {
             if (p.piece == KING && includeKingMoves) piecemoves = kingMove(let, num, p.iswhite, p.iswhite ? canWhiteCastle : canBlackCastle);
             if (p.piece == QUEEN) piecemoves = queenMove(let, num, p.iswhite);
             if (p.piece == ROOK) piecemoves = rookMove(let, num, p.iswhite);
-            moves.insert(piecemoves.begin(), piecemoves.end());
+
+            // Optimization Notes:
+            // By the nature of alpha-beta search, it is advantageous to encounter moves that are stronger faster.  This reordering
+            // sketchily hangs on the assumption that random pawn moves tend to be worse than full piece moves
+            if (p.piece == PAWN) {
+                for (move m : piecemoves) moves.push_back(m);
+            }
+            else {
+                for (move m : piecemoves) moves.push_front(m);
+            }
         }
     }
 
-    set<board::move> valids;
-    for (move m : moves) {
-        if (confirmNoKingProblems(m.p.iswhite,m)) valids.insert(m);
-    }
+    final = {moves.begin(), moves.end()};
 
-    if (valids.size() == 0) cout << "Checkmate on the board!" << endl;
-    return moves;
+    return final;
 }
 
 std::set<board::move> board::pawnMove(int let, int num, bool isWhite) {
@@ -372,7 +390,7 @@ bool board::confirmNoKingProblems(bool isWhite, board::move mo) {
         }
     }
 
-    std::set<move> options = PossibleMovesWithColor(false);
+    std::vector<move> options = PossibleMovesWithColor(false);
     for (move m : options) {
         if (m.d1 == let && m.d2 == num) {
             return false; // a.k.a there is a problem
@@ -394,4 +412,46 @@ void board::ToString() {
         }
         cout << endl;
     }
+}
+
+//static void InitializeHashTable() {
+//    map<board::piece, int> toPieces = {{{false, board::PAWN},1}, {{false, board::ROOK},2}, {{false, board::KNIGHT},3}, {{false, board::BISHOP},4}, {{false, board::QUEEN},5}, {{false, board::KING},6},
+//                                       {{false, board::KNIGHT},7}, {{false, board::KNIGHT},8}, {{false, board::KNIGHT},9}, {{false, board::KNIGHT},10}, {{false, board::KNIGHT},11}, {{false, board::KNIGHT},12}};
+
+//    for (int i = 0; i < 8; i++) {
+//        for (int j = 0; j < 8; j++) {
+//            for (int k = 0; k < 12; k++) board::ZOBRIST_TABLE[i][j][k] = randomInteger(0,256);
+//        }
+//    }
+//}
+
+
+
+std::string board::ToHashString() {
+    string s = "                                                                ";
+    for (int j = 0; j < 8; j++) {
+        for (int i = 0; i < 8; i++) {
+            string val = typeToStr[_board[i][7-j].piece];
+            if (_board[i][7-j].iswhite) s[8*j + i] = val[0];
+            else {
+                s[8*j + i] = toupper(val[0]);
+            }
+        }
+    }
+    return s;
+
+// Uses the Zobrist Algorithm to Hash
+// https://en.wikipedia.org/wiki/Zobrist_hashing
+//    map<board::piece, int> toPieces = {{{false, board::PAWN},1}, {{false, board::ROOK},2}, {{false, board::KNIGHT},3}, {{false, board::BISHOP},4}, {{false, board::QUEEN},5}, {{false, board::KING},6},
+//                                       {{false, board::KNIGHT},7}, {{false, board::KNIGHT},8}, {{false, board::KNIGHT},9}, {{false, board::KNIGHT},10}, {{false, board::KNIGHT},11}, {{false, board::KNIGHT},12}};
+
+//    double h = 0;
+//    for (int i = 0; i < 8; i++) {
+//        for (int j = 0; j < 8; j++) {
+//            double p = toPieces[_board[i][j]];
+//            h = (h ^ p);
+//        }
+//    }
+
+//    return h;
 }

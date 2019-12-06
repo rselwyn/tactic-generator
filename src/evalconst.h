@@ -13,7 +13,7 @@ const double QUEEN_VALUE = 2538;
 const double ROOK_VALUE = 1276;
 const double KING_VALUE = 100000.0; // Effectively Infinity
 
-const int NOMINAL_MAX_DEPTH = 5;
+const int NOMINAL_MAX_DEPTH = 6;
 
 // Constants Sourced from the #1 chess engine in the world
 // which can be found at https://github.com/official-stockfish/Stockfish/blob/master/src/psqt.cpp#L41

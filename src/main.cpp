@@ -7,9 +7,20 @@
 
 using namespace std;
 
+enum Mode {
+    UNSET,
+    FREE_PLAY,
+    TACTIC
+};
+
+Mode mode = UNSET;
+
 int main() {
     display d;
+//    board *b = new board("2r2rk1/pp1bqpp1/2np1n1p/2pp2N1/1bP5/1P4P1/PBQPPPBP/3R1RK1");
     board *b = new board;
+    b->ToString();
+    getLine();
     d.ShowBoard(b);
 //    b->MakeMove({0, 6, 0, 5, {true, board::ptype::PAWN}, false});
 
@@ -26,8 +37,7 @@ int main() {
         d.ShowBoard(b);
 
         engine::kConsidered = 0;
-        cout << "Evaluation: " << engine::evalb(b) << endl;
-        std::set<board::move> moves = b->PossibleMoves();
+        std::vector<board::move> moves = b->PossibleMoves();
         engine::moveoption move = engine::bestmove(b);
         cout << "Nodes: " << engine::kConsidered << endl;
 

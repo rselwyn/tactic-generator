@@ -2,7 +2,7 @@
 #define ENGINE_H
 
 #include "board.h"
-
+#include "hashmap.h"
 
 class engine {
     public:

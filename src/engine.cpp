@@ -2,7 +2,13 @@
 #include "evalconst.h"
 #include "board.h"
 #include <iostream>
+#include <vector>
 #include <chrono>
+#include "hashmap.h"
+
+// Multithreaded action
+#include <pthread.h>
+
 
 #include "stdio.h"
 
@@ -49,16 +55,19 @@ double engine::evalb(board *b) {
 engine::moveoption engine::bestmove(board* b) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::set<board::move> moves = b->PossibleMoves();
+    std::vector<board::move> moves = b->PossibleMoves();
     bool whiteMove = b->sideToMove;
     double topValue = whiteMove ? 10000000 : -10000000;
     board::move topMove;
+
 
     for (board::move cm : moves) {
         board *copy = new board;
         *copy = *b;
         copy->MakeMove(cm);
         double eval = minimax(copy, NOMINAL_MAX_DEPTH - 1, true, -1000000, 1000000);
+        std::cout << cm.toString() << " ";
+        std::cout << eval << std::endl;
         if ((eval < topValue && whiteMove)
                 || (eval > topValue && !whiteMove)) {
             topValue = eval;
@@ -76,6 +85,7 @@ engine::moveoption engine::bestmove(board* b) {
 }
 
 double engine::minimax(board* b, int depth, bool isMax, double alpha, double beta) {
+
     engine::kConsidered += 1.0;
     if (depth == 0) {
         return evalb(b);
@@ -83,12 +93,16 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
 
     if (isMax) {
         double bestValue = -10000000;
-        std::set<board::move> moves = b->PossibleMoves();
+        std::vector<board::move> moves = b->PossibleMoves();
         for (board::move option : moves) {
             b->MakeMove(option);
-            bestValue = std::max(bestValue, minimax(b, depth-1, !isMax, alpha, beta));
+            double mm = minimax(b, depth-1, !isMax, alpha, beta);
+//            std::cout << "After " << option.toString() << " Eval is " << mm << std::endl;
+            bestValue = std::max(bestValue, mm);
             alpha = std::max(alpha, bestValue);
             b->UndoLast();
+//            std::cout << "Undo" << std::endl;
+
             if (alpha > beta) {
                 break;
             }
@@ -97,12 +111,15 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
     }
     else {
         double bestValue = 10000000;
-        std::set<board::move> moves = b->PossibleMoves();
+        std::vector<board::move> moves = b->PossibleMoves();
         for (board::move option : moves) {
             b->MakeMove(option);
-            bestValue = std::min(bestValue, minimax(b, depth-1, !isMax, alpha, beta));
+            double mm = minimax(b, depth-1, !isMax, alpha, beta);
+            //            std::cout << "After " << option.toString() << " Eval is " << mm << std::endl;
+            bestValue = std::min(bestValue, mm);
             beta = std::min(beta, bestValue);
             b->UndoLast();
+//            std::cout << "Undo" << std::endl;
             if (beta < alpha) {
                 break;
             }
