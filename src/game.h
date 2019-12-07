@@ -12,14 +12,15 @@
 #include <vector>
 
 const std::string TACTIC_FILE_EXT = "processed/";
-const std::vector<std::string> TACTIC_FILES = {"group.epgn", "lichess.epgn"};
+const std::vector<std::string> TACTIC_FILES = {"lichess.epgn"};
 
 class game
 {
     public:
         game();
         game(std::string fen, bool whiteToPlay);
-        void evaluateGame(engine e);
+        void evaluateGame();
+        void csvEvaluation();
 
         static std::vector<game*> LoadFile(std::ifstream &in);
         static void OpenPossibleTactics(std::vector<std::ifstream*> &streams);

@@ -18,7 +18,7 @@ game::game(std::string fen, bool whiteToPlay) {
 void game::OpenPossibleTactics(std::vector<std::ifstream*> &streams) {
     for (std::string s : TACTIC_FILES) {
         std::ifstream* stream = new std::ifstream;
-        std::cout << TACTIC_FILE_EXT + s << std::endl;
+        std::cout << "Loaded file: " << TACTIC_FILE_EXT + s << std::endl;
         stream->open((TACTIC_FILE_EXT + s));
         if (!stream->good()) std::cout << "Error loading " << s << std::endl;
         streams.push_back(stream);
@@ -41,7 +41,6 @@ std::vector<game*> game::LoadFile(std::ifstream &in) {
 
     game *g = NULL;
     while (getline(in, line)) {
-//        std::cout << line << std::endl;
         if (line == "TACTIC") {
             startNewTactic = true;
             if (g != NULL) {
@@ -58,6 +57,9 @@ std::vector<game*> game::LoadFile(std::ifstream &in) {
             g->Advance(line);
         }
     }
+    if (g != NULL) {
+        ret.push_back(g);
+    }
     return ret;
 }
 
@@ -70,9 +72,17 @@ void game::Advance(board::move m) {
 }
 
 // Can only be called once
-void game::evaluateGame(engine e) {
+void game::evaluateGame() {
+    int i = 1;
     for (std::string move : moveOrder) {
         b->MakeMove(move);
         evaluation.push_back(engine::bestmove(b).evaluation);
+        std::cout << "Evaluated move " << (++i)/2 << std::endl;
+    }
+}
+
+void game::csvEvaluation() {
+    for (double d : evaluation) {
+        std::cout << d << ", " << std::endl;
     }
 }

@@ -74,22 +74,20 @@ engine::moveoption engine::bestmove(board* b) {
         board::minimax_args *args = new board::minimax_args;
         args->b = copy;
         args->depth = NOMINAL_MAX_DEPTH - 1;
-        args->isMax = true;
+        args->isMax = b->sideToMove;
         args->alpha = -1000000;
         args->beta = 1000000;
         args->writeVal = &extreme_value[i];
         copies[i] = args;
-        std::cout << "Run" << std::endl;
         pthread_create(&eval_threads[i], NULL, dispatch_minimax, (void*) args);
     }
 
     for (int i = 0; i < moves.size(); i++)
         pthread_join(eval_threads[i], NULL);
 
+    std::cout << std::endl;
     for (int i = 0; i < moves.size(); i++) {
         double eval = extreme_value[i];
-        std::cout << moves[i].toString() << " ";
-        std::cout << eval << std::endl;
         if ((eval < topValue && whiteMove)
                 || (eval > topValue && !whiteMove)) {
             topValue = eval;
@@ -109,9 +107,9 @@ engine::moveoption engine::bestmove(board* b) {
 
 void* engine::dispatch_minimax(void *_i) {
     struct board::minimax_args *args = (struct board::minimax_args*) _i;
-//    args->b->ToString();
     double value = minimax(args->b, args->depth, args->isMax, args->alpha, args->beta);
-    std::cout << value << std::endl;
+//    std::cout << value << std::endl;
+    std::cout << ".";
     *(args->writeVal) = value;
 
     return NULL;
