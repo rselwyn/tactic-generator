@@ -39,12 +39,14 @@ std::vector<game*> game::LoadFile(std::ifstream &in) {
 
     std::vector<game*> ret;
 
-    game *g;
+    game *g = NULL;
     while (getline(in, line)) {
 //        std::cout << line << std::endl;
         if (line == "TACTIC") {
             startNewTactic = true;
-            if (g != NULL) ret.push_back(g);
+            if (g != NULL) {
+                ret.push_back(g);
+            }
         }
         else if (startNewTactic) {
             startNewTactic = false;

@@ -429,6 +429,7 @@ bool board::confirmNoKingProblems(bool isWhite, board::move mo) {
 }
 
 void board::ToString() {
+    cout << "Here" << endl;
     for (int j = 0; j < 8; j++) {
         for (int i = 0; i < 8; i++) {
             string val = typeToStr[_board[i][7-j].piece];

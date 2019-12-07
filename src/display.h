@@ -31,9 +31,11 @@ static const double kPercentOfCell = .90;
 // Text
 
 static const std::string kTextColor = "#000000";
+static const std::string kRedColor = "#ff2600";
 static const std::string kHeader = "Courier-BOLD-21";
-static const std::string kPlain = "Courier-PLAIN-12";
+static const std::string kPlain = "Courier-PLAIN-18";
 static const std::string kBold  = "Courier-BOLD-12";
+
 
 class display : private GWindow {
 
@@ -41,10 +43,17 @@ class display : private GWindow {
         display();
         ~display();
         void ShowBoard(board *b);
+        void ChangeModeText(std::string mode);
+        void ChangePromptText(std::string text);
+        void ChangeResponseMove(std::string response);
+        void DisplaySidebar();
+
     private:
+        std::string mode;
+        std::string userPrompt;
+        std::string response;
         std::map<board::piece, GImage*> imageStorage;
         void DisplayCells();
-        void DisplaySidebar();
 };
 
 #endif // DISPLAY_H

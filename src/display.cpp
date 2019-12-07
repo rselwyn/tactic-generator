@@ -1,5 +1,6 @@
 #include "display.h"
 #include "gobjects.h"
+#include "ginteractors.h"
 #include "board.h"
 
 display::display() : GWindow(kCellWidth * BOARD_CELLS + kNonBoardWidth, kCellWidth * BOARD_CELLS)
@@ -55,13 +56,54 @@ void display::ShowBoard(board *b) {
 }
 
 void display::DisplaySidebar() {
-    GText header("Chess Tactics Explorer");
+    GRect clear;
+    clear.setX(7*kCellWidth);
+    clear.setY(0);
+    clear.setWidth(kNonBoardWidth);
+    clear.setHeight(8*kCellWidth);
+    clear.setColor("#ffffff");
+    draw(clear);
+
+    GText header("Chess Explorer");
     header.setFont(kHeader);
-    header.setX(7 * kCellWidth + kNonBoardWidth/4);
+    header.setX(8 * kCellWidth + 60);
     header.setY(30);
     header.setColor(kTextColor);
     draw(header);
 
+    GText mo(mode);
+    mo.setFont(kPlain);
+    mo.setX(8 * kCellWidth + 60);
+    mo.setY(60);
+    mo.setColor(kRedColor);
+    draw(mo);
+
+    GText user(userPrompt);
+    user.setFont(kPlain);
+    user.setX(8 * kCellWidth + 60);
+    user.setY(90);
+    user.setColor(kTextColor);
+    draw(user);
+
+    GText res(response);
+    res.setFont(kPlain);
+    res.setX(8 * kCellWidth + 60);
+    res.setY(120);
+    res.setColor(kTextColor);
+    draw(res);
+
 
     repaint();
+}
+
+void display::ChangeModeText(std::string mode) {
+    this->mode = mode;
+}
+
+void display::ChangePromptText(std::string text) {
+    this->userPrompt = text;
+}
+
+void display::ChangeResponseMove(std::string response) {
+    this->response = response;
 }

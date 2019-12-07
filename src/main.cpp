@@ -11,7 +11,8 @@ using namespace std;
 enum Mode {
     UNSET,
     FREE_PLAY,
-    TACTIC
+    TACTIC,
+    DIFFICULTY_EVAL
 };
 
 Mode mode = UNSET;
@@ -21,25 +22,15 @@ std::vector<game*> loadSavedTactics() {
     game::OpenPossibleTactics(files);
 
     std::vector<game*> games;
-    cout << "m iterate" << endl;
 
     for (ifstream* f : files) {
-        cout << "iterate" << endl;
         std::vector<game*> temp = game::LoadFile(*f);
-        cout << "Past " << endl;
         games.insert(games.end(), temp.begin(), temp.end());
-        cout << "Past " << endl;
     }
     return games;
-//    return {};
 }
 
-int main() {
-    display d;
-//    board *b = new board("2r2rk1/pp1bqpp1/2np1n1p/2pp2N1/1bP5/1P4P1/PBQPPPBP/3R1RK1");
-    std::vector<game*> tact = loadSavedTactics();
-    cout << tact.size() << endl;
-    getLine();
+void humanVsEngine(display &d) {
     board *b = new board;
     b->ToString();
     getLine();
@@ -69,5 +60,25 @@ int main() {
         d.ShowBoard(b);
         engine::kConsidered = 0;
     }
+}
+
+void playAgainstTactic(display &d) {
+
+}
+
+
+
+
+int main() {
+    display d;
+    d.ChangeModeText("No Mode Selected");
+    d.ChangePromptText("Engine Waiting...");
+    d.ChangeResponseMove("Placeholder");
+    d.DisplaySidebar();
+    std::vector<game*> tact = loadSavedTactics();
+
+    tact[0]->b->ToString();
+    getLine();
+
     return 0;
 }

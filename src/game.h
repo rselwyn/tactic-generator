@@ -23,12 +23,11 @@ class game
 
         static std::vector<game*> LoadFile(std::ifstream &in);
         static void OpenPossibleTactics(std::vector<std::ifstream*> &streams);
-
+        board *b;
 
     private:
         std::vector<std::string> moveOrder;
         std::vector<double> evaluation;
-        board *b;
         void Advance(std::string move);
         void Advance(board::move m);
 
