@@ -32,7 +32,7 @@ public:
         // s = start, d = dest
         int s1; int s2; int d1; int d2; piece p; bool isCastle;
         std::string toString() {
-            return ((char) ('a' + s1)) + std::to_string((s2+1)) + ((char) ('a' + d1)) + std::to_string(d2+1) + ")";
+            return ((char) ('a' + s1)) + std::to_string((s2+1)) + ((char) ('a' + d1)) + std::to_string(d2+1);
         }
     };
 

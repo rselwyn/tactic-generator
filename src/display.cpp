@@ -57,16 +57,18 @@ void display::ShowBoard(board *b) {
 
 void display::DisplaySidebar() {
     GRect clear;
-    clear.setX(7*kCellWidth);
+    clear.setX(8*kCellWidth);
     clear.setY(0);
     clear.setWidth(kNonBoardWidth);
     clear.setHeight(8*kCellWidth);
-    clear.setColor("#ffffff");
+    clear.setFilled(true);
+    clear.setLineWidth(0);
+    clear.setFillColor("#ffffff");
     draw(clear);
 
     GText header("Chess Explorer");
     header.setFont(kHeader);
-    header.setX(8 * kCellWidth + 60);
+    header.setX(8 * kCellWidth + 40);
     header.setY(30);
     header.setColor(kTextColor);
     draw(header);
