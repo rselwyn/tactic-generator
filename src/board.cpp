@@ -37,7 +37,8 @@ board::board()
     for (int j = 2; j < 6; j++) for (int i = 0; i < 8; i++) _board[i][j] = {true, EMPTY};
 }
 
-board::board(string fen) {
+board::board(string fen, bool isWhiteToPlay) {
+    sideToMove = !isWhiteToPlay;
 
     int currentLetter = -1;
     int currentRow = 7;
@@ -56,9 +57,8 @@ board::board(string fen) {
         if (std::find(validPieces.begin(), validPieces.end(), fen[i]) != validPieces.end()) {
             // It is a valid piece
             currentLetter++;
-            cout << ((char) ('a'+currentLetter)) << (currentRow+1) << std::endl;
+//            cout << ((char) ('a'+currentLetter)) << (currentRow+1) << std::endl;
             _board[currentLetter][currentRow] = toPieces.at(std::find(validPieces.begin(), validPieces.end(), fen[i]) - validPieces.begin());
-            cout << "add " << endl;
         }
         else {
             if (isdigit(fen[i])) {
@@ -78,14 +78,26 @@ board::piece board::MakeMove(move m) {
     _board[m.d1][m.d2] = _board[m.s1][m.s2];
     _board[m.s1][m.s2].piece = EMPTY;
     sideToMove = !sideToMove;
+    if (m.isCastle) {
+        if (m.d1 > m.s1) {
+            // Castle Kingside
+            _board[5][m.d2] = _board[7][m.d2];
+            _board[7][m.d2].piece = EMPTY;
+        }
+        else {
+            // Castle Queenside
+            _board[3][m.d2] = _board[0][m.d2];
+            _board[0][m.d2].piece = EMPTY;
+        }
+    }
     performedMovesStack.push(std::make_pair(m, copy));
     return copy;
 }
 
 board::piece board::MakeMove(std::string m) {
     // This method is assumed to be called with a valid move...
-    piece copy = _board[m[2]-'a'][m[3]-'1'];
-    move mo = {m[0]-'a', m[1]-'1', m[2]-'a', m[3]-'1', copy, false};
+    piece copy = _board[m[0]-'a'][m[1]-'1'];
+    move mo = {m[0]-'a', m[1]-'1', m[2]-'a', m[3]-'1', copy, (copy.piece == KING && m[2]-m[0] == 2)};
     return MakeMove(mo);
 }
 
@@ -100,6 +112,19 @@ void board::UndoLast() {
     sideToMove = !sideToMove;
     _board[lastMove.first.s1][lastMove.first.s2] = lastMove.first.p;
     _board[lastMove.first.d1][lastMove.first.d2] = lastMove.second;
+
+    if (lastMove.first.isCastle) {
+        if (lastMove.first.d1 > lastMove.first.s1) {
+            // Castle Kingside
+            _board[7][lastMove.first.d2] = _board[5][lastMove.first.d2];
+            _board[5][lastMove.first.d2].piece = EMPTY;
+        }
+        else {
+            // Castle Queenside
+            _board[0][lastMove.first.d2] = _board[3][lastMove.first.d2];
+            _board[3][lastMove.first.d2].piece = EMPTY;
+        }
+    }
 }
 
 
@@ -263,18 +288,20 @@ std::set<board::move> board::kingMove(int let, int num, bool isWhite, bool canCa
         }
     }
 
-    if (canCastle && isWhite && let == 4 && num == 0 && _board[let+1][num].piece == EMPTY &&
-            _board[let+2][num].piece == EMPTY && _board[let+3][num].piece == ROOK && _board[let+1][num].iswhite) {
+    if (canCastle && let == 4 && (num == 0 || num == 7) && _board[let+1][num].piece == EMPTY &&
+            _board[let+2][num].piece == EMPTY && _board[let+3][num].piece == ROOK && _board[let+3][num].iswhite == isWhite) {
         // Then, we can castle kingside
-        ret.insert({let, num, let+3, num, {isWhite, KING}, true});
+        ret.insert({let, num, let+2, num, {isWhite, KING}, true});
     }
 
-    if (canCastle && isWhite && let == 4 && num == 0 && _board[let-1][num].piece == EMPTY &&
+    if (canCastle && let == 4 && (num == 0 || num == 7) && _board[let-1][num].piece == EMPTY &&
             _board[let-2][num].piece == EMPTY && num == 0 && _board[let-3][num].piece == EMPTY
-            && _board[let-4][num].piece == ROOK && _board[let-4][num].iswhite && canCastle) {
+            && _board[let-4][num].piece == ROOK && _board[let-4][num].iswhite == isWhite && canCastle) {
         // Then, we can castle queenside
-        ret.insert({let, num, let-4, num, {isWhite, KING}, true});
+        ret.insert({let, num, let-2, num, {isWhite, KING}, true});
     }
+
+
 
     return ret;
 }

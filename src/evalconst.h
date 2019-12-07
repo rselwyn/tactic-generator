@@ -54,7 +54,7 @@ const double QUEEN_AT_POSITION_VALUES[8][4] = {{3,-5,-5,4},
                                                {-5,6,10,8},
                                                {-2,-2,1,-2}};
 
-const double KING_AT_POSITION_VALUES[8][4] = {{271,327,270,192},
+const double KING_AT_POSITION_VALUES[8][4] = {{271,457,280,192},
                                               {278,303,230,174},
                                               {195,258,169,120},
                                               {164,190,138,98},

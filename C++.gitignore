@@ -10,7 +10,7 @@
 # Precompiled Headers
 *.gch
 *.pch
-
+*.epgn
 *.pro.user
 
 # Compiled Dynamic libraries

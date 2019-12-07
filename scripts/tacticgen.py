@@ -12,10 +12,11 @@ for file_ext in raw:
         pgn = chess.pgn.read_game(f)
         if pgn == None:
             break
-        games.append([str(pgn.board().board_fen())] + list(pgn.main_line()))
+        turn = "w" if pgn.board().turn == chess.WHITE else "b"
+        games.append([turn + str(pgn.board().board_fen())] + list(pgn.main_line()))
 
     txt = [[str(i) for i in board] for board in games]
-    fout = open("processed/"+file_ext, "w")
+    fout = open("processed/"+file_ext.replace("pgn","epgn"), "w")
 
     for g in txt:
         fout.write("TACTIC\n")

@@ -346,6 +346,7 @@ QMAKE_CXXFLAGS += -Wreturn-type
 QMAKE_CXXFLAGS += -Werror=return-type
 QMAKE_CXXFLAGS += -Werror=uninitialized
 QMAKE_CXXFLAGS += -Wunreachable-code
+
 exists($$PWD/lib/autograder/*.h) | exists($$PWD/lib/StanfordCPPLib/autograder/$$PROJECT_FILTER/*.h) | exists($$PWD/lib/autograder/$$PROJECT_FILTER/*.cpp) {
     # omit some warnings/errors in autograder projects
     # (largely because the Google Test framework violates them a ton of times)

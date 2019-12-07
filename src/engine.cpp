@@ -65,12 +65,11 @@ engine::moveoption engine::bestmove(board* b) {
 
     pthread_t eval_threads[moves.size()];
     double extreme_value[moves.size()]; // max or min
-    board* copies[moves.size()];
+    board::minimax_args* copies[moves.size()];
 
     for (int i = 0; i < moves.size(); i++) {
         board *copy = new board;
         *copy = *b;
-        copies[i] = copy;
         copy->MakeMove(moves[i]);
         board::minimax_args *args = new board::minimax_args;
         args->b = copy;
@@ -79,6 +78,7 @@ engine::moveoption engine::bestmove(board* b) {
         args->alpha = -1000000;
         args->beta = 1000000;
         args->writeVal = &extreme_value[i];
+        copies[i] = args;
         std::cout << "Run" << std::endl;
         pthread_create(&eval_threads[i], NULL, dispatch_minimax, (void*) args);
     }
@@ -95,6 +95,7 @@ engine::moveoption engine::bestmove(board* b) {
             topValue = eval;
             topMove = moves[i];
         }
+        pthread_cancel(eval_threads[i]);
         delete copies[i];
     }
 

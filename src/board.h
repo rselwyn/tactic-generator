@@ -38,6 +38,10 @@ public:
 
     struct minimax_args {
         board* b; int depth; bool isMax; double alpha; double beta; double* writeVal;
+
+        ~minimax_args() {
+            delete b;
+        }
     };
 
     friend bool operator<(const move &a, const move &b) {
@@ -49,7 +53,7 @@ public:
     }
 
     board(); // construct a default chess board
-    board(std::string fen); // construct board from FEN notation
+    board(std::string fen, bool isWhiteToPlay); // construct board from FEN notation
     ~board();
 
     std::vector<move> PossibleMoves();
