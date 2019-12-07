@@ -36,6 +36,10 @@ public:
         }
     };
 
+    struct minimax_args {
+        board* b; int depth; bool isMax; double alpha; double beta; double* writeVal;
+    };
+
     friend bool operator<(const move &a, const move &b) {
         return (1000*a.d1 + 100*a.d2+10*a.s1 + a.s2) < (1000*b.d1 + 100 * b.d2 + 10*b.s1 + b.s2);
     }

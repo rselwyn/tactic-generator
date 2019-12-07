@@ -6,6 +6,8 @@
 #include <chrono>
 #include "hashmap.h"
 
+#include "simpio.h"
+
 // Multithreaded action
 #include <pthread.h>
 
@@ -52,6 +54,7 @@ double engine::evalb(board *b) {
     return white - black;
 }
 
+
 engine::moveoption engine::bestmove(board* b) {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -60,20 +63,39 @@ engine::moveoption engine::bestmove(board* b) {
     double topValue = whiteMove ? 10000000 : -10000000;
     board::move topMove;
 
+    pthread_t eval_threads[moves.size()];
+    double extreme_value[moves.size()]; // max or min
+    board* copies[moves.size()];
 
-    for (board::move cm : moves) {
+    for (int i = 0; i < moves.size(); i++) {
         board *copy = new board;
         *copy = *b;
-        copy->MakeMove(cm);
-        double eval = minimax(copy, NOMINAL_MAX_DEPTH - 1, true, -1000000, 1000000);
-        std::cout << cm.toString() << " ";
+        copies[i] = copy;
+        copy->MakeMove(moves[i]);
+        board::minimax_args *args = new board::minimax_args;
+        args->b = copy;
+        args->depth = NOMINAL_MAX_DEPTH - 1;
+        args->isMax = true;
+        args->alpha = -1000000;
+        args->beta = 1000000;
+        args->writeVal = &extreme_value[i];
+        std::cout << "Run" << std::endl;
+        pthread_create(&eval_threads[i], NULL, dispatch_minimax, (void*) args);
+    }
+
+    for (int i = 0; i < moves.size(); i++)
+        pthread_join(eval_threads[i], NULL);
+
+    for (int i = 0; i < moves.size(); i++) {
+        double eval = extreme_value[i];
+        std::cout << moves[i].toString() << " ";
         std::cout << eval << std::endl;
         if ((eval < topValue && whiteMove)
                 || (eval > topValue && !whiteMove)) {
             topValue = eval;
-            topMove = cm;
+            topMove = moves[i];
         }
-        delete copy; // memory management
+        delete copies[i];
     }
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -82,6 +104,16 @@ engine::moveoption engine::bestmove(board* b) {
              << duration.count() << " microseconds" << std::endl;
 
     return {topValue, topMove};
+}
+
+void* engine::dispatch_minimax(void *_i) {
+    struct board::minimax_args *args = (struct board::minimax_args*) _i;
+//    args->b->ToString();
+    double value = minimax(args->b, args->depth, args->isMax, args->alpha, args->beta);
+    std::cout << value << std::endl;
+    *(args->writeVal) = value;
+
+    return NULL;
 }
 
 double engine::minimax(board* b, int depth, bool isMax, double alpha, double beta) {
