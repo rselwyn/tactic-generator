@@ -107,6 +107,7 @@ void playAgainstTactic(display &d) {
 
     game* attempt = tact[randomInteger(0,tact.size() - 1)];
     attempt->evaluateGame();
+    attempt->csvEvaluation();
     int scan = attempt->ScanForTactic();
     attempt->gotoMove(scan, d);
     d.ShowBoard(attempt->b);
@@ -120,6 +121,7 @@ void playAgainstTactic(display &d) {
         cout << moves[0].toString() << endl;
         cout << "Computing Correct Move.  Please standby." << endl;
         engine::moveoption option = engine::bestmove(attempt->b);
+        cout << "Right move eval 1 " << option.evaluation << " 2 " << option.evalSecondBest << endl;
         cout << "The Computer knows the best move.  What do you think it is?" << endl;
         string s;
         while(true) {

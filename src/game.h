@@ -13,7 +13,7 @@
 
 const std::string TACTIC_FILE_EXT = "processed/";
 const std::vector<std::string> TACTIC_FILES = {"lichess.epgn"};
-const int DONT_EVALUATE_FIRST_N = 10; // Don't evaluate the first 10 moves for tactics because
+const int DONT_EVALUATE_FIRST_N = 11; // Don't evaluate the first 10 moves for tactics because
                                       // they aren't that interesting.
 
 const double RAPID_TRANSITION_EVAL = 2.5; // in Pawn Values
