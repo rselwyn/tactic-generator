@@ -465,8 +465,6 @@ void board::InitializeHashTable() {
     board::ZOBRIST_BLACK_MOVE = board::generateRandomBitString();
 }
 
-
-
 std::string board::ToHashString() {
     string s = "                                                                ";
     for (int j = 0; j < 8; j++) {
@@ -504,4 +502,8 @@ long board::ZobristKey() {
         }
 
         return h;
+}
+
+int board::movesMade() {
+    return this->performedMovesStack.size();
 }

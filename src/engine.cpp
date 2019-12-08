@@ -62,6 +62,8 @@ engine::moveoption engine::bestmove(board* b) {
     std::vector<board::move> moves = b->PossibleMoves();
     bool whiteMove = b->sideToMove;
     double topValue = whiteMove ? 10000000 : -10000000;
+    double secondBest = whiteMove ? 10000000 : -10000000;
+
     board::move topMove;
 
     pthread_t eval_threads[moves.size()];
@@ -86,7 +88,6 @@ engine::moveoption engine::bestmove(board* b) {
     }
 
     for (int i = 0; i < moves.size(); i++) {
-        std::cout << "Done" << std::endl;
         pthread_join(eval_threads[i], NULL);   
     }
 
@@ -95,6 +96,7 @@ engine::moveoption engine::bestmove(board* b) {
         double eval = extreme_value[i];
         if ((eval < topValue && whiteMove)
                 || (eval > topValue && !whiteMove)) {
+            secondBest = topValue;
             topValue = eval;
             topMove = moves[i];
         }
@@ -107,13 +109,12 @@ engine::moveoption engine::bestmove(board* b) {
     std::cout << "Time taken by function: "
              << duration.count() << " microseconds" << std::endl;
 
-    return {topValue, topMove};
+    return {topValue, topMove, secondBest};
 }
 
 void* engine::dispatch_minimax(void *_i) {
     struct board::minimax_args *args = (struct board::minimax_args*) _i;
     double value = minimax(args->b, args->depth, args->isMax, args->alpha, args->beta, args->tt);
-    std::cout << ".";
     *(args->writeVal) = value;
 
     return NULL;

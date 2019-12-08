@@ -68,32 +68,31 @@ void display::DisplaySidebar() {
 
     GText header("Chess Explorer");
     header.setFont(kHeader);
-    header.setX(8 * kCellWidth + 40);
+    header.setX(8 * kCellWidth + 30);
     header.setY(30);
     header.setColor(kTextColor);
     draw(header);
 
     GText mo(mode);
     mo.setFont(kPlain);
-    mo.setX(8 * kCellWidth + 60);
+    mo.setX(8 * kCellWidth + 30);
     mo.setY(60);
     mo.setColor(kRedColor);
     draw(mo);
 
     GText user(userPrompt);
     user.setFont(kPlain);
-    user.setX(8 * kCellWidth + 60);
+    user.setX(8 * kCellWidth + 30);
     user.setY(90);
     user.setColor(kTextColor);
     draw(user);
 
     GText res(response);
     res.setFont(kPlain);
-    res.setX(8 * kCellWidth + 60);
+    res.setX(8 * kCellWidth + 30);
     res.setY(120);
     res.setColor(kTextColor);
     draw(res);
-
 
     repaint();
 }

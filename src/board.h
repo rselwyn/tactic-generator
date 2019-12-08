@@ -80,6 +80,7 @@ public:
     static long generateRandomBitString();
 
     long ZobristKey();
+    int movesMade();
 
 private:
 

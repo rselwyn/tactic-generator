@@ -3,8 +3,9 @@
 #include <iostream>
 #include <istream>
 #include <fstream>
-
+#include "evalconst.h"
 #include "dirent.h"
+#include "engine.h"
 
 game::game()
 {
@@ -81,9 +82,21 @@ void game::evaluateGame() {
             evaluation.push_back(0);
         }
         else {
-            evaluation.push_back(engine::bestmove(b).evaluation);
+            engine::moveoption op = engine::bestmove(b);
+            evaluation.push_back(op.evaluation);
         }
         std::cout << "Evaluated move " << moveNumber  << std::endl;
+    }
+}
+
+void game::gotoMove(int move, display& d) {
+    std::cout << "GOTO " << move << std::endl;
+    for (int i = b->movesMade(); i > 0; i--) {
+        b->UndoLast();
+    }
+    std::cout << "End" << std::endl;
+    for (int i = 0; i < move; i++) {
+        b->MakeMove(this->moveOrder[i]);
     }
 }
 
@@ -95,5 +108,24 @@ void game::csvEvaluation() {
 
 int game::ScanForTactic() {
     if (evaluation.size() == 0) return -1; // If there is no data, we can't find any tactics.
+    std::vector<double> first_pass = evaluation;
+
+    for (int i = 2; i < first_pass.size(); i++) {
+        first_pass[i] = (3*first_pass[i] + 2 * first_pass[i-1] + first_pass[i-2]) / 6.0;
+
+        // Normalize all evaluations by the standard value of a pawn (in chess,
+        // positions are typically given in terms of who is better and by how many pawns)
+        first_pass[i] /= PAWN_VALUE;
+
+        // The pawn values seem a little off in my evaluation, but they are relatively speaking correct
+        first_pass[i] /= 1.05;
+    }
+
+    for (int i = 1; i < first_pass.size(); i++) {
+        if (std::abs(first_pass[i] - first_pass[i-1]) > RAPID_TRANSITION_EVAL) {
+            return i;
+        }
+    }
+
     return 0;
 }

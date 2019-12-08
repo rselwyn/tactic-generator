@@ -11,6 +11,7 @@ class engine {
         struct moveoption {
             double evaluation;
             board::move m;
+            double evalSecondBest;
         };
 
         static double evalb(board* b);

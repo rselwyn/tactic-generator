@@ -49,9 +49,9 @@ void humanVsEngine(display &d) {
             "- The format for entering moves is in algebraic notation" << endl <<
             "- Each piece is given a location with a letter (for column) and a letter for row (a number)." << endl <<
             "- For example, the left most pawn is at position a2, the right white knight is at f1, etc." << endl <<
-            "- To make a move, type the start square and the destination square." << endl <<
+            "- To make a move, type the start square and the destination square (like e2e4)." << endl <<
             "- To castle, simply type the move for the king and the program will move the rook for you!" << endl;
-    cout << "Good luck!" << endl;
+    cout << "Good luck! (type 'exit' to quit) " << endl;
 
     while(true) {
         std::vector<board::move> whitemoves = b->PossibleMoves();
@@ -89,10 +89,66 @@ void humanVsEngine(display &d) {
 }
 
 void playAgainstTactic(display &d) {
+    cout << "How to Play: " << endl;
+    cout << "- This is similar to a chess game, but your job is only to play a few moves." << endl <<
+            "- *** THE MOVES THAT YOU PLAY SHOULD IMPROVE THE POSITION SUBSTANTIALLY ***" << endl <<
+            "- The format for entering moves is in algebraic notation" << endl <<
+            "- Each piece is given a location with a letter (for column) and a letter for row (a number)." << endl <<
+            "- For example, the left most pawn is at position a2, the right white knight is at f1, etc." << endl <<
+            "- To make a move, type the start square and the destination square (like e2e4)." << endl;
+    cout << "Good luck! (type 'exit' to quit) " << endl;
+
     std::vector<game*> tact = loadSavedTactics();
-    game* attempt = tact[0];
+    cout << "Loading random tactic" << endl;
+    d.ChangeModeText("Tactic Solver");
+    d.ChangePromptText("Analyzing...Check console");
+    d.ChangeResponseMove(" for progress.");
+    d.DisplaySidebar();
+
+    game* attempt = tact[randomInteger(0,tact.size() - 1)];
     attempt->evaluateGame();
-    attempt->csvEvaluation();
+    int scan = attempt->ScanForTactic();
+    attempt->gotoMove(scan, d);
+    d.ShowBoard(attempt->b);
+
+    d.ChangePromptText("Your move.");
+    d.ChangeResponseMove("");
+    d.DisplaySidebar();
+
+    while (true) {
+        std::vector<board::move> moves = attempt->b->PossibleMoves();
+        cout << moves[0].toString() << endl;
+        cout << "Computing Correct Move.  Please standby." << endl;
+        engine::moveoption option = engine::bestmove(attempt->b);
+        cout << "The Computer knows the best move.  What do you think it is?" << endl;
+        string s;
+        while(true) {
+            s = getLine("Your move: ");
+            if (s == "exit") {
+                delete attempt;
+                return;
+            }
+            if (!confirmValidMove(moves, s)) {
+                 cout << "Malformed input.  Please try again." << endl;
+                 continue;
+            }
+            if (option.m.toString() == s) {
+                cout << "Correct!" << endl;
+                attempt->b->MakeMove(s);
+                break;
+            }
+            else {
+                cout << "Oops.  That isn't the most precise move.  Try again." << endl;
+            }
+        }
+        d.ShowBoard(attempt->b);
+        option = engine::bestmove(attempt->b);
+        attempt->b->MakeMove(option.m);
+        d.ChangeResponseMove("Engine Played " + option.m.toString());
+        d.DisplaySidebar();
+        d.ShowBoard(attempt->b);
+
+    }
 }
 
 int main() {
@@ -104,8 +160,8 @@ int main() {
     board::InitializeHashTable();
 
     while (true) {
-        std::string option = getLine("Enter the number for your desired mode.  "
-                                     "1: Play The Engine. 2: Play a Tactic. 3: Numerical Tactical Difficulty Evaluation");
+        std::string option = getLine("Enter the number for your desired mode.\n  "
+                                     "1: Play The Engine. \n2: Play a Tactic. \n3: Numerical Tactical Difficulty Evaluation");
         if (option == "1") {
             humanVsEngine(d);
         }
