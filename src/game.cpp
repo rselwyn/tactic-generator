@@ -75,9 +75,15 @@ void game::Advance(board::move m) {
 void game::evaluateGame() {
     int i = 1;
     for (std::string move : moveOrder) {
+        int moveNumber = (++i)/2;
         b->MakeMove(move);
-        evaluation.push_back(engine::bestmove(b).evaluation);
-        std::cout << "Evaluated move " << (++i)/2 << std::endl;
+        if (moveNumber < DONT_EVALUATE_FIRST_N) {
+            evaluation.push_back(0);
+        }
+        else {
+            evaluation.push_back(engine::bestmove(b).evaluation);
+        }
+        std::cout << "Evaluated move " << moveNumber  << std::endl;
     }
 }
 
@@ -85,4 +91,9 @@ void game::csvEvaluation() {
     for (double d : evaluation) {
         std::cout << d << ", " << std::endl;
     }
+}
+
+int game::ScanForTactic() {
+    if (evaluation.size() == 0) return -1; // If there is no data, we can't find any tactics.
+    return 0;
 }

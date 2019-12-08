@@ -10,6 +10,10 @@
 
 using namespace std;
 
+long board::ZOBRIST_TABLE[8][8][12]; // Contains bitstrings to hash with
+long board::ZOBRIST_WHITE_MOVE;
+long board::ZOBRIST_BLACK_MOVE;
+
 board::board()
 {
     // White Pieces
@@ -441,16 +445,25 @@ void board::ToString() {
     }
 }
 
-//static void InitializeHashTable() {
-//    map<board::piece, int> toPieces = {{{false, board::PAWN},1}, {{false, board::ROOK},2}, {{false, board::KNIGHT},3}, {{false, board::BISHOP},4}, {{false, board::QUEEN},5}, {{false, board::KING},6},
-//                                       {{false, board::KNIGHT},7}, {{false, board::KNIGHT},8}, {{false, board::KNIGHT},9}, {{false, board::KNIGHT},10}, {{false, board::KNIGHT},11}, {{false, board::KNIGHT},12}};
+long board::generateRandomBitString() {
+    // Source: https://stackoverflow.com/questions/21096015/how-to-generate-64-bit-random-numbers
+    // Note: C++ does not make it incredibly easy to generate large random bitstrings, so this will have
+    // to do.
+    return ((long long) rand() << 32) | rand();
+}
 
-//    for (int i = 0; i < 8; i++) {
-//        for (int j = 0; j < 8; j++) {
-//            for (int k = 0; k < 12; k++) board::ZOBRIST_TABLE[i][j][k] = randomInteger(0,256);
-//        }
-//    }
-//}
+void board::InitializeHashTable() {
+    map<board::piece, int> toPieces = {{{false, board::PAWN},1}, {{false, board::ROOK},2}, {{false, board::KNIGHT},3}, {{false, board::BISHOP},4}, {{false, board::QUEEN},5}, {{false, board::KING},6},
+                                       {{false, board::KNIGHT},7}, {{false, board::KNIGHT},8}, {{false, board::KNIGHT},9}, {{false, board::KNIGHT},10}, {{false, board::KNIGHT},11}, {{false, board::KNIGHT},12}};
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            for (int k = 0; k < 12; k++) board::ZOBRIST_TABLE[i][j][k] = board::generateRandomBitString();
+        }
+    }
+
+    board::ZOBRIST_WHITE_MOVE = board::generateRandomBitString();
+    board::ZOBRIST_BLACK_MOVE = board::generateRandomBitString();
+}
 
 
 
@@ -466,19 +479,29 @@ std::string board::ToHashString() {
         }
     }
     return s;
+}
 
-// Uses the Zobrist Algorithm to Hash
-// https://en.wikipedia.org/wiki/Zobrist_hashing
-//    map<board::piece, int> toPieces = {{{false, board::PAWN},1}, {{false, board::ROOK},2}, {{false, board::KNIGHT},3}, {{false, board::BISHOP},4}, {{false, board::QUEEN},5}, {{false, board::KING},6},
-//                                       {{false, board::KNIGHT},7}, {{false, board::KNIGHT},8}, {{false, board::KNIGHT},9}, {{false, board::KNIGHT},10}, {{false, board::KNIGHT},11}, {{false, board::KNIGHT},12}};
+long board::ZobristKey() {
+//     Uses the Zobrist Algorithm to Hash
+//     https://en.wikipedia.org/wiki/Zobrist_hashing
+        map<board::piece, int> toPieces = {{{false, board::PAWN},1}, {{false, board::ROOK},2}, {{false, board::KNIGHT},3}, {{false, board::BISHOP},4}, {{false, board::QUEEN},5}, {{false, board::KING},6},
+                                           {{false, board::KNIGHT},7}, {{false, board::KNIGHT},8}, {{false, board::KNIGHT},9}, {{false, board::KNIGHT},10}, {{false, board::KNIGHT},11}, {{false, board::KNIGHT},12}};
 
-//    double h = 0;
-//    for (int i = 0; i < 8; i++) {
-//        for (int j = 0; j < 8; j++) {
-//            double p = toPieces[_board[i][j]];
-//            h = (h ^ p);
-//        }
-//    }
+        long h = 0;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                int p = toPieces[_board[i][j]];
+                long pkey = board::ZOBRIST_TABLE[i][j][p];
+                h = (h ^ pkey);
+            }
+        }
 
-//    return h;
+        if (!this->sideToMove) {
+            h = (h ^ board::ZOBRIST_WHITE_MOVE);
+        }
+        else {
+            h = (h ^ board::ZOBRIST_BLACK_MOVE);
+        }
+
+        return h;
 }

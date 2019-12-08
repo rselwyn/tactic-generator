@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 #include "hashmap.h"
+#include <exception>
 
 #include "simpio.h"
 
@@ -66,6 +67,7 @@ engine::moveoption engine::bestmove(board* b) {
     pthread_t eval_threads[moves.size()];
     double extreme_value[moves.size()]; // max or min
     board::minimax_args* copies[moves.size()];
+    std::unordered_map<long, std::pair<double, int>> *table = new std::unordered_map<long, std::pair<double, int>>;
 
     for (int i = 0; i < moves.size(); i++) {
         board *copy = new board;
@@ -78,12 +80,15 @@ engine::moveoption engine::bestmove(board* b) {
         args->alpha = -1000000;
         args->beta = 1000000;
         args->writeVal = &extreme_value[i];
+        args->tt = table;
         copies[i] = args;
         pthread_create(&eval_threads[i], NULL, dispatch_minimax, (void*) args);
     }
 
-    for (int i = 0; i < moves.size(); i++)
-        pthread_join(eval_threads[i], NULL);
+    for (int i = 0; i < moves.size(); i++) {
+        std::cout << "Done" << std::endl;
+        pthread_join(eval_threads[i], NULL);   
+    }
 
     std::cout << std::endl;
     for (int i = 0; i < moves.size(); i++) {
@@ -107,15 +112,24 @@ engine::moveoption engine::bestmove(board* b) {
 
 void* engine::dispatch_minimax(void *_i) {
     struct board::minimax_args *args = (struct board::minimax_args*) _i;
-    double value = minimax(args->b, args->depth, args->isMax, args->alpha, args->beta);
-//    std::cout << value << std::endl;
+    double value = minimax(args->b, args->depth, args->isMax, args->alpha, args->beta, args->tt);
     std::cout << ".";
     *(args->writeVal) = value;
 
     return NULL;
 }
 
-double engine::minimax(board* b, int depth, bool isMax, double alpha, double beta) {
+/**
+ * This is the primary minimax function that the program uses.  It implements the basic minimax algorithm, in
+ * addition to alpha-beta subtree pruning.  I have also built up almost the entire framework for transposition tables,
+ * but was unable to utilize my implementation because I was not able to get the multithreaded access to the map to work
+ * (there are issues with thread safety which require mutex locks).  The transposition table, which is effectively memoization (that we did in class),
+ * is backed by the Zobrist hashing algrothim, which is implemented in board.cpp (to efficiently hash a board state).
+ *
+ * On top of this, I have built a heuristic into the movgen code (in board.cpp as well) which in theory should improve
+ * the number of search branches that can be removed with the alpha-beta pruning.
+ */
+double engine::minimax(board* b, int depth, bool isMax, double alpha, double beta, std::unordered_map<long, std::pair<double, int>> *transpose) {
 
     engine::kConsidered += 1.0;
     if (depth == 0) {
@@ -127,12 +141,12 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
         std::vector<board::move> moves = b->PossibleMoves();
         for (board::move option : moves) {
             b->MakeMove(option);
-            double mm = minimax(b, depth-1, !isMax, alpha, beta);
-//            std::cout << "After " << option.toString() << " Eval is " << mm << std::endl;
+//            std::cout << key << std::endl;
+            double mm = minimax(b, depth-1, !isMax, alpha, beta, transpose);
+
             bestValue = std::max(bestValue, mm);
             alpha = std::max(alpha, bestValue);
             b->UndoLast();
-//            std::cout << "Undo" << std::endl;
 
             if (alpha > beta) {
                 break;
@@ -145,12 +159,11 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
         std::vector<board::move> moves = b->PossibleMoves();
         for (board::move option : moves) {
             b->MakeMove(option);
-            double mm = minimax(b, depth-1, !isMax, alpha, beta);
-            //            std::cout << "After " << option.toString() << " Eval is " << mm << std::endl;
+            double mm = minimax(b, depth-1, !isMax, alpha, beta, transpose);
+
             bestValue = std::min(bestValue, mm);
             beta = std::min(beta, bestValue);
             b->UndoLast();
-//            std::cout << "Undo" << std::endl;
             if (beta < alpha) {
                 break;
             }

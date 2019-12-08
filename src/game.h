@@ -13,6 +13,8 @@
 
 const std::string TACTIC_FILE_EXT = "processed/";
 const std::vector<std::string> TACTIC_FILES = {"lichess.epgn"};
+const int DONT_EVALUATE_FIRST_N = 10; // Don't evaluate the first 10 moves for tactics because
+                                      // they aren't that interesting.
 
 class game
 {
@@ -31,6 +33,7 @@ class game
         std::vector<double> evaluation;
         void Advance(std::string move);
         void Advance(board::move m);
+        int ScanForTactic();
 
 };
 

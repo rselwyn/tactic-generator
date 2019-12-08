@@ -43,6 +43,7 @@ void humanVsEngine(display &d) {
     d.ChangeModeText("Human vs. Computer");
     board *b = new board;
     d.ShowBoard(b);
+
     cout << "How to Play: " << endl;
     cout << "- This is a standard chess game" << endl <<
             "- The format for entering moves is in algebraic notation" << endl <<
@@ -94,15 +95,13 @@ void playAgainstTactic(display &d) {
     attempt->csvEvaluation();
 }
 
-
-
-
 int main() {
     display d;
     d.ChangeModeText("No Mode Selected");
     d.ChangePromptText("Engine Waiting...");
     d.ChangeResponseMove("Placeholder");
     d.DisplaySidebar();
+    board::InitializeHashTable();
 
     while (true) {
         std::string option = getLine("Enter the number for your desired mode.  "

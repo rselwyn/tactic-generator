@@ -6,7 +6,7 @@
 #include <map>
 #include <stack>
 #include <set>
-
+#include <unordered_map>
 
 class board
 {
@@ -37,7 +37,7 @@ public:
     };
 
     struct minimax_args {
-        board* b; int depth; bool isMax; double alpha; double beta; double* writeVal;
+        board* b; int depth; bool isMax; double alpha; double beta; double* writeVal; std::unordered_map<long, std::pair<double, int>> *tt;
 
         ~minimax_args() {
             delete b;
@@ -72,6 +72,14 @@ public:
 
     std::string ToHashString();
 
+    static long ZOBRIST_TABLE[8][8][12]; // Contains bitstrings to hash with
+    static long ZOBRIST_WHITE_MOVE;
+    static long ZOBRIST_BLACK_MOVE;
+
+    static void InitializeHashTable();
+    static long generateRandomBitString();
+
+    long ZobristKey();
 
 private:
 

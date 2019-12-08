@@ -17,7 +17,7 @@ class engine {
         static void* dispatch_minimax(void *_i);
         static moveoption bestmove(board* b);
         // Minimax with alpha-beta pruning
-        static double minimax(board* b, int depth, bool isMax, double alpha, double beta);
+        static double minimax(board* b, int depth, bool isMax, double alpha, double beta, std::unordered_map<long, std::pair<double, int>> *transpose);
 
     private:
 
