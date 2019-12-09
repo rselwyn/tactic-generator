@@ -6,7 +6,7 @@
 #include <chrono>
 #include "hashmap.h"
 #include <exception>
-
+#include "stdio.h"
 #include "simpio.h"
 
 // Multithreaded action
@@ -21,6 +21,7 @@
 // https://en.wikipedia.org/wiki/Minimax
 
 double engine::kConsidered = 0;
+double engine::kGlobalAlpha = 0;
 
 // Positive evaluation is an advantage for white
 double engine::evalb(board *b) {
@@ -64,28 +65,59 @@ engine::moveoption engine::bestmove(board* b) {
     double topValue = whiteMove ? 10000000 : -10000000;
     double secondBest = whiteMove ? 10000000 : -10000000;
 
+    double alpha = -1000000;
+    double beta = 1000000;
+
     board::move topMove;
 
     pthread_t eval_threads[moves.size()];
     double extreme_value[moves.size()]; // max or min
     board::minimax_args* copies[moves.size()];
     std::unordered_map<long, std::pair<double, int>> *table = new std::unordered_map<long, std::pair<double, int>>;
+    // evaluate first n, get results back, and feed those as alphas for the new things
+    for (int range = 0; range < moves.size(); range+=5) {
+        for (int i = 0; i < 5; i++) {
+            int index = (range + i);
+            std::cout << "Spawning " << index << std::endl;
+            if (index >= moves.size()) break;
 
-    for (int i = 0; i < moves.size(); i++) {
-        board *copy = new board;
-        *copy = *b;
-        copy->MakeMove(moves[i]);
-        board::minimax_args *args = new board::minimax_args;
-        args->b = copy;
-        args->depth = NOMINAL_MAX_DEPTH - 1;
-        args->isMax = b->sideToMove;
-        args->alpha = -1000000;
-        args->beta = 1000000;
-        args->writeVal = &extreme_value[i];
-        args->tt = table;
-        copies[i] = args;
-        pthread_create(&eval_threads[i], NULL, dispatch_minimax, (void*) args);
+            board *copy = new board;
+            *copy = *b;
+            copy->MakeMove(moves[index]);
+            board::minimax_args *args = new board::minimax_args;
+            args->b = copy;
+            args->depth = NOMINAL_MAX_DEPTH - 1;
+            args->isMax = b->sideToMove;
+            args->alpha = alpha;
+            args->beta = beta;
+            args->writeVal = &extreme_value[index];
+            args->tt = table;
+            copies[index] = args;
+            pthread_create(&eval_threads[index], NULL, dispatch_minimax, (void*) args);
+        }
+        for (int i = 0; i < 5; i++) {
+            int index = (range + i);
+            if (index >= moves.size()) break;
+            pthread_join(eval_threads[index], NULL);
+            std::cout << "Joined thread " << index << std::endl;
+            std::cout << extreme_value[index] << std::endl;
+
+            if (!b->sideToMove) {
+                std::cout << "alpha " << alpha << std::endl;
+                alpha = std::max(alpha, extreme_value[index]);
+                std::cout << "alpha " << alpha << std::endl;
+
+            }
+            else {
+                std::cout << "beta " << beta << std::endl;
+
+                beta = std::min(beta, extreme_value[index]);
+                std::cout << "beta " << beta << std::endl;
+
+            }
+        }
     }
+
 
     for (int i = 0; i < moves.size(); i++) {
         pthread_join(eval_threads[i], NULL);   
