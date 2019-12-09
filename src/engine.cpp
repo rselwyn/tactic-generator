@@ -58,7 +58,6 @@ double engine::evalb(board *b) {
 // Multithreads the candidate moves, and passes those off to other threads to handle the work.
 // Referenced the following for function timing: https://www.geeksforgeeks.org/measure-execution-time-function-cpp/
 engine::moveoption engine::bestmove(board* b, int MAX_DEPTH) {
-    std::cout << "Starting Analysis" << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
 
     std::vector<board::move> moves = b->PossibleMoves();

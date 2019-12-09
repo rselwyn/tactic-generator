@@ -74,6 +74,9 @@ void game::Advance(board::move m) {
 
 // Can only be called once
 void game::evaluateGame() {
+    std::cout << "Evaluating the entire game.  Please standby (should take 30-45 seconds)." << std::endl;
+    std::cout << "Please press enter to start" << std::endl;
+    getLine();
     int i = 1;
     for (std::string move : moveOrder) {
         int moveNumber = (++i)/2;
@@ -82,7 +85,6 @@ void game::evaluateGame() {
         }
         else {
             engine::moveoption op = engine::bestmove(b, TACTIC_MAX_DEPTH);
-            b->ToString();
             evaluation.push_back(op.evaluation);
             std::cout << op.m.toString() << std::endl;
         }
@@ -97,7 +99,7 @@ void game::gotoMove(int move, display& d) {
         b->UndoLast();
     }
     std::cout << "End" << std::endl;
-    for (int i = 0; i < move+1; i++) {
+    for (int i = 0; i < move; i++) {
         b->MakeMove(this->moveOrder[i]);
     }
 }

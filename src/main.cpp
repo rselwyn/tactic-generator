@@ -106,19 +106,16 @@ void playAgainstTactic(display &d) {
     d.ChangeResponseMove(" for progress.");
     d.DisplaySidebar();
     int index = randomInteger(0, tact.size() - 1);
-    cout << index << endl;
-    cout << tact.size() << endl;
-    getLine();
     game* attempt = tact[index];
     attempt->evaluateGame();
-    attempt->csvEvaluation();
     int scan = attempt->ScanForTactic();
     attempt->gotoMove(scan, d);
     d.ShowBoard(attempt->b);
-
-    d.ChangePromptText("Your move.");
+    std::string color = ((scan% 2 == 0) ? "WHITE" : "BLACK");
+    d.ChangePromptText("Your play " + color + ".");
     d.ChangeResponseMove("");
     d.DisplaySidebar();
+    cout << "You are playing as " + color << endl;
 
     while (true) {
         std::vector<board::move> moves = attempt->b->PossibleMoves();
