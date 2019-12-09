@@ -122,6 +122,10 @@ void playAgainstTactic(display &d) {
         cout << "Computing Correct Move.  Please standby." << endl;
         engine::moveoption option = engine::bestmove(attempt->b);
         cout << "Right move eval 1 " << option.evaluation << " 2 " << option.evalSecondBest << endl;
+        if (std::abs(option.evaluation - option.evalSecondBest) < TACTIC_IS_OVER) {
+            cout << "Tactic complete!" << endl;
+            return;
+        }
         cout << "The Computer knows the best move.  What do you think it is?" << endl;
         string s;
         while(true) {

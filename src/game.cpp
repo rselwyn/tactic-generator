@@ -95,7 +95,7 @@ void game::gotoMove(int move, display& d) {
         b->UndoLast();
     }
     std::cout << "End" << std::endl;
-    for (int i = 0; i < move; i++) {
+    for (int i = 0; i < move+1; i++) {
         b->MakeMove(this->moveOrder[i]);
     }
 }

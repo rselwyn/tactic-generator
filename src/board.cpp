@@ -7,6 +7,7 @@
 #include "random.h"
 #include <vector>
 #include <deque>
+#include <algorithm>
 
 using namespace std;
 
