@@ -51,12 +51,14 @@ double engine::evalb(board *b) {
         }
     }
 
-
     return white - black;
 }
 
-
-engine::moveoption engine::bestmove(board* b) {
+// Computes the best move starting from the root node of the tree.
+// Multithreads the candidate moves, and passes those off to other threads to handle the work.
+// Referenced the following for function timing: https://www.geeksforgeeks.org/measure-execution-time-function-cpp/
+engine::moveoption engine::bestmove(board* b, int MAX_DEPTH) {
+    std::cout << "Starting Analysis" << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
 
     std::vector<board::move> moves = b->PossibleMoves();
@@ -67,24 +69,32 @@ engine::moveoption engine::bestmove(board* b) {
     double alpha = -1000000;
     double beta = 1000000;
 
+    // Return value of the best move
     board::move topMove;
 
+    // Threads that are being run
     pthread_t eval_threads[moves.size()];
+
+    // Values returned from each search
     double extreme_value[moves.size()]; // max or min
     board::minimax_args* copies[moves.size()];
+
+    // Transposition table;
     std::unordered_map<long, std::pair<double, int>> *table = new std::unordered_map<long, std::pair<double, int>>;
+
     // evaluate first n, get results back, and feed those as alphas for the new things
     for (int range = 0; range < moves.size(); range+=EVAL_THREADS) {
         for (int i = 0; i < EVAL_THREADS; i++) {
             int index = (range + i);
             if (index >= moves.size()) break;
 
+            // Allocate a new board and a new set of arguments (that will be deleted later on)
             board *copy = new board;
             *copy = *b;
             copy->MakeMove(moves[index]);
             board::minimax_args *args = new board::minimax_args;
             args->b = copy;
-            args->depth = NOMINAL_MAX_DEPTH - 1;
+            args->depth = MAX_DEPTH - 1;
             args->isMax = b->sideToMove;
             args->alpha = alpha;
             args->beta = beta;
@@ -96,10 +106,12 @@ engine::moveoption engine::bestmove(board* b) {
         for (int i = 0; i < EVAL_THREADS; i++) {
             int index = (range + i);
             if (index >= moves.size()) break;
+            // Wait for the thread to be done
             pthread_join(eval_threads[index], NULL);
+
+            // Update Alpha and Beta
             if (!b->sideToMove) {
                 alpha = std::max(alpha, extreme_value[index]);
-
             }
             else {
                 beta = std::min(beta, extreme_value[index]);
@@ -107,12 +119,12 @@ engine::moveoption engine::bestmove(board* b) {
         }
     }
 
-
+    // Ensure all threads are joined up (no threads running)
     for (int i = 0; i < moves.size(); i++) {
         pthread_join(eval_threads[i], NULL);   
     }
 
-    std::cout << std::endl;
+    // Find the best move
     for (int i = 0; i < moves.size(); i++) {
         double eval = extreme_value[i];
         if ((eval < topValue && whiteMove)
@@ -121,19 +133,21 @@ engine::moveoption engine::bestmove(board* b) {
             topValue = eval;
             topMove = moves[i];
         }
+        // Memory and thread clean up
         pthread_cancel(eval_threads[i]);
         delete copies[i];
     }
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    std::cout << "Time taken by function: "
+    std::cout << "Function took: "
              << duration.count() << " microseconds" << std::endl;
 
     return {topValue, topMove, secondBest};
 }
 
 void* engine::dispatch_minimax(void *_i) {
+    // Dispatches a new minimax function in a separate thread
     struct board::minimax_args *args = (struct board::minimax_args*) _i;
     double value = minimax(args->b, args->depth, args->isMax, args->alpha, args->beta, args->tt);
     *(args->writeVal) = value;
@@ -152,7 +166,6 @@ void* engine::dispatch_minimax(void *_i) {
  * the number of search branches that can be removed with the alpha-beta pruning.
  */
 double engine::minimax(board* b, int depth, bool isMax, double alpha, double beta, std::unordered_map<long, std::pair<double, int>> *transpose) {
-
     engine::kConsidered += 1.0;
     if (depth == 0) {
         return evalb(b);
@@ -163,7 +176,6 @@ double engine::minimax(board* b, int depth, bool isMax, double alpha, double bet
         std::vector<board::move> moves = b->PossibleMoves();
         for (board::move option : moves) {
             b->MakeMove(option);
-//            std::cout << key << std::endl;
             double mm = minimax(b, depth-1, !isMax, alpha, beta, transpose);
 
             bestValue = std::max(bestValue, mm);

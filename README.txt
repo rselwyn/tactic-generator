@@ -1,8 +1,7 @@
 Generating Chess Tactics and Quantifying Perceived Difficulty
 ------------------------------------------------------------
 
-My project is broken down into three primary components: the chess engine, the tactic finder, and the difficulty evaluator.  One important thing to note: when running my program in QT Creator.  PLEASE BUILD THE PROJECT FOR RELEASE TO ENSURE IT RUNS AS FAST AS POSSIBLE.
-
+My project is broken down into three primary components: the chess engine, the tactic finder, and the difficulty evaluator.  One important thing to note: when running my program in QT Creator.  PLEASE BUILD THE PROJECT FOR RELEASE TO ENSURE IT RUNS AS FAST AS POSSIBLE.  The program has been tested to work on a Mac and on a PC.  All instructions as for what to do are printed out before play. 
 
 1.  To be able to do pretty much anything with chess, there must be an engine to evaluate any position.  From scratch, I wrote not only the chess engine, but also the model class for the chess board.  The chess board class supports nearly all of the rules of chess (it does not support en-passant unfortunately), it can calculate all of the possible moves at its current position, and it is capable of doing and undoing moves.  
 
@@ -12,10 +11,10 @@ At any given point in time, there are only so many threads that can be run on yo
 
 The last thing that I implemented for the engine was a transposition table, which is effectively like memoization for a chess board.  Unlike a lot of the memoization that we did in class, using transposition tables is a little bit difficult because you have to hash the chess board somehow.  To hash the chess board, I implemented the Zobrist algorithm.  While I have left the code for the TT in the engine, it is not utilized because I was not able to figure out the mutex locks for the unordered_map to run in a multithreaded manner.
 
-A word about performance: In evalconstants.h, you can modify the depth of the engine and the number of evaluation threads.  On my 2-core Mac, the most comfortable settings are probably to run at 4 evaluation threads and a game analysis depth of 6.  The game analysis can be pushed to a depth of 7, but move generation will take a little longer.  On a faster computer, you can push up the evaluation threads or the depth, but I wouldn't move the depth past 7 because the eval tree gets too big.
+A word about performance: In evalconstants.h, you can modify the depth of the engine and the number of evaluation threads.  On my 2-core Mac, the most comfortable settings are probably to run at 4 evaluation threads and a game analysis depth of 6.  The game analysis can be pushed to a depth of 7, but move generation will take a little longer (at depth 7, it takes about 10-20 seconds to generate a move).  On a faster computer, you can push up the evaluation threads or the depth, but I wouldn't move the depth past 7 because the eval tree gets too big.
 
 2. The second thing that I implemented was a tactic scanner and finder.  To start, chess games are typically serialized into what are called pgn files, which have all the moves, information about where the game was played, and more.  Parsing these files in C++ would be very difficult, but luckily, the Python chess module provides a pretty easy way to parse the pgn.  After parsing the pgn in python, I serialize the data in a much more simple format (see the epgn files in the resource folder).  The parsing code is located in tacticgen.py (which you should be able to run if you run the command "pip install python-chess").  
 
-Once the files are parsed, they can be moved into the res/processed folder.  These files are then read in by game.h, processed, and presented to the user.   
+Once the files are parsed, they can be moved into the res/processed folder.  These files are then read in by game.h, processed, and presented to the user.  Whe nthe code calculates that the tactic is done, it stops running it and lets the user continue with something else. 
 
-3. 
+3. Please see the comments in the main file for this.  While I wasn't able to have a fully coded up solution to this (getting the engine to work up to a depth of 7 and compute tactics took a majority of my time), I think my algorithmic write up is complete. 

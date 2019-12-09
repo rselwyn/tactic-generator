@@ -5,6 +5,7 @@
 #include "simpio.h"
 #include "engine.h"
 #include "game.h"
+#include "evalconst.h"
 
 using namespace std;
 
@@ -77,7 +78,7 @@ void humanVsEngine(display &d) {
         std::vector<board::move> moves = b->PossibleMoves();
         d.ChangePromptText("Engine thinking...");
         d.DisplaySidebar();
-        engine::moveoption move = engine::bestmove(b);
+        engine::moveoption move = engine::bestmove(b, NOMINAL_MAX_DEPTH);
         cout << "Nodes: " << engine::kConsidered << endl;
         cout << "Best Move: ";
         cout << move.m.toString() << " with value " << move.evaluation << endl;
@@ -104,7 +105,7 @@ void playAgainstTactic(display &d) {
     d.ChangePromptText("Analyzing...Check console");
     d.ChangeResponseMove(" for progress.");
     d.DisplaySidebar();
-    int index = randomInteger(0, tact.size());
+    int index = randomInteger(0, tact.size() - 1);
     cout << index << endl;
     cout << tact.size() << endl;
     getLine();
@@ -123,7 +124,7 @@ void playAgainstTactic(display &d) {
         std::vector<board::move> moves = attempt->b->PossibleMoves();
         cout << moves[0].toString() << endl;
         cout << "Computing Correct Move.  Please standby." << endl;
-        engine::moveoption option = engine::bestmove(attempt->b);
+        engine::moveoption option = engine::bestmove(attempt->b, TACTIC_MAX_DEPTH);
         cout << "Right move eval 1 " << option.evaluation << " 2 " << option.evalSecondBest << endl;
         if (std::abs(option.evaluation - option.evalSecondBest) < TACTIC_IS_OVER) {
             cout << "Tactic complete!" << endl;
@@ -151,7 +152,7 @@ void playAgainstTactic(display &d) {
             }
         }
         d.ShowBoard(attempt->b);
-        option = engine::bestmove(attempt->b);
+        option = engine::bestmove(attempt->b, TACTIC_MAX_DEPTH);
         attempt->b->MakeMove(option.m);
         d.ChangeResponseMove("Engine Played " + option.m.toString());
         d.DisplaySidebar();
@@ -182,6 +183,8 @@ void difficulty(display &d) {
             5. Add to the difficulty number the value of (count * i)
         6. return difficulty number
       */
+
+    cout << "Please see the comments within the code for this section" << endl;
 }
 
 int main() {
@@ -191,7 +194,7 @@ int main() {
     d.ChangeResponseMove("Placeholder");
     d.DisplaySidebar();
     board::InitializeHashTable();
-
+    cout << "Please ensure that the program has been built in _release_ mode." << endl;
     while (true) {
         std::string option = getLine("Enter the number for your desired mode.\n"
                                      "1: Play The Engine. \n2: Play a Tactic. \n3: Numerical Tactical Difficulty Evaluation");

@@ -12,7 +12,7 @@
 #include <vector>
 
 const std::string TACTIC_FILE_EXT = "processed/";
-const std::vector<std::string> TACTIC_FILES = {"lichess.epgn", "second.epgn"};
+const std::vector<std::string> TACTIC_FILES = {"lichess.epgn", "new.epgn"};
 const int DONT_EVALUATE_FIRST_N = 11; // Don't evaluate the first 10 moves for tactics because
                                       // they aren't that interesting.
 

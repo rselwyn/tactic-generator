@@ -16,6 +16,7 @@ display::~display() {
 
 }
 
+// Displays the light and dark cells
 void display::DisplayCells() {
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
@@ -28,7 +29,9 @@ void display::DisplayCells() {
     repaint();
 }
 
+// Displays the board given a board*
 void display::ShowBoard(board *b) {
+    // Displays the background colors
     DisplayCells();
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
@@ -55,6 +58,7 @@ void display::ShowBoard(board *b) {
     repaint();
 }
 
+// Creates all of the graphics objects on the right side of the screen
 void display::DisplaySidebar() {
     GRect clear;
     clear.setX(8*kCellWidth);
@@ -97,6 +101,8 @@ void display::DisplaySidebar() {
     repaint();
 }
 
+// Setter methods used to modify on screen text
+// NOTE: Does not update the view.
 void display::ChangeModeText(std::string mode) {
     this->mode = mode;
 }

@@ -11,12 +11,16 @@
 
 using namespace std;
 
+// Tables Used for Hashing
 long board::ZOBRIST_TABLE[8][8][12]; // Contains bitstrings to hash with
 long board::ZOBRIST_WHITE_MOVE;
 long board::ZOBRIST_BLACK_MOVE;
 
 board::board()
 {
+    // Function used to configure a basic chess board
+    // from no starting moves.
+
     // White Pieces
     for (int i = 0; i < 8; i++) _board[i][1] = {true, PAWN};
     _board[0][0] = {true, ROOK};
@@ -39,10 +43,14 @@ board::board()
     _board[6][7] = {false, KNIGHT};
     _board[7][7] = {false, ROOK};
 
+    // Initialize other stuff to be empty
     for (int j = 2; j < 6; j++) for (int i = 0; i < 8; i++) _board[i][j] = {true, EMPTY};
 }
 
 board::board(string fen, bool isWhiteToPlay) {
+    // Loads a board from an FEN (Forsyth-Edwards Notation) String
+    // Initializes the board and other variables.
+
     sideToMove = !isWhiteToPlay;
 
     int currentLetter = -1;
@@ -52,6 +60,7 @@ board::board(string fen, bool isWhiteToPlay) {
     vector<piece> toPieces = {{true, KNIGHT}, {false, KNIGHT}, {true, PAWN}, {false, PAWN}, {true, ROOK}, {false, ROOK},
                              {true, KING}, {false, KING}, {true, QUEEN}, {false, QUEEN}, {true, BISHOP}, {false, BISHOP}};
 
+    // Empty initialize everything
     for (int i = 0; i < 8; i++) for (int j = 0; j < 8; j++) _board[i][j] = {true, EMPTY};
 
     for (int i = 0; i < fen.length(); i++) {
@@ -62,7 +71,6 @@ board::board(string fen, bool isWhiteToPlay) {
         if (std::find(validPieces.begin(), validPieces.end(), fen[i]) != validPieces.end()) {
             // It is a valid piece
             currentLetter++;
-//            cout << ((char) ('a'+currentLetter)) << (currentRow+1) << std::endl;
             _board[currentLetter][currentRow] = toPieces.at(std::find(validPieces.begin(), validPieces.end(), fen[i]) - validPieces.begin());
         }
         else {
@@ -74,12 +82,15 @@ board::board(string fen, bool isWhiteToPlay) {
 }
 
 board::~board() {
-
+    // No heap memory needs to be discarded
 }
 
+// Provides a method to move a piece on the board
+// will return the captured piece of a piece is captured.
 board::piece board::MakeMove(move m) {
     // This method is assumed to be called with a valid move...
     piece copy = _board[m.d1][m.d2];
+    // Move the piece
     _board[m.d1][m.d2] = _board[m.s1][m.s2];
     _board[m.s1][m.s2].piece = EMPTY;
     sideToMove = !sideToMove;
@@ -95,10 +106,12 @@ board::piece board::MakeMove(move m) {
             _board[0][m.d2].piece = EMPTY;
         }
     }
+    // Put the move on the stack of moves so that we can undo for backtracking
     performedMovesStack.push(std::make_pair(m, copy));
     return copy;
 }
 
+// construct a move from a string
 board::piece board::MakeMove(std::string m) {
     // This method is assumed to be called with a valid move...
     piece copy = _board[m[0]-'a'][m[1]-'1'];
@@ -106,6 +119,7 @@ board::piece board::MakeMove(std::string m) {
     return MakeMove(mo);
 }
 
+// Undo a move
 void board::UndoLast() {
     if (performedMovesStack.empty()) {
         cerr << "ERROR: Attempting to undo a non-existant move." << endl;
@@ -132,7 +146,7 @@ void board::UndoLast() {
     }
 }
 
-
+// Checks bounds (used heavily in move-generation)
 bool board::inBounds(int let, int num) {
     return 0 <= let && let < 8 && num >= 0 && num < 8;
 }
@@ -144,6 +158,7 @@ std::vector<board::move> board::PossibleMoves() {
 // Include king moves parameter makes it so that we can get all of the moves with the king moves
 // not included.
 std::vector<board::move> board::PossibleMovesWithColor(bool includeKingMoves) {
+    // Use a deque to maintain a list of moves so that we can front-insert
     deque<board::move> moves;
     vector<board::move> final;
     for (int num = 0; num < 8; num++) {
@@ -171,10 +186,10 @@ std::vector<board::move> board::PossibleMovesWithColor(bool includeKingMoves) {
     }
 
     final = {moves.begin(), moves.end()};
-
     return final;
 }
 
+// Calculates possibles moves for a pawn at a position (let, num) with color isWhite
 std::set<board::move> board::pawnMove(int let, int num, bool isWhite) {
     int wd = isWhite ? 1 : -1; // pieces move forward when white and "backward" when black
     set<board::move> ret;
@@ -196,6 +211,7 @@ std::set<board::move> board::pawnMove(int let, int num, bool isWhite) {
     return ret;
 }
 
+// Calculates possibles moves for a knight at a position (let, num) with color isWhite
 std::set<board::move> board::knightMove(int let, int num, bool isWhite) {
     set<board::move> ret;
 
@@ -210,12 +226,12 @@ std::set<board::move> board::knightMove(int let, int num, bool isWhite) {
     return ret;
 }
 
+// Calculates possibles moves for a bishop at a position (let, num) with color isWhite
 std::set<board::move> board::bishopMove(int let, int num, bool isWhite) {
     // Very similar to the code for the rook moves, except that we are now going up and side by 1 instead of just in one direction
     set<board::move> ret;
-    // NOTE:
-    // Diagonal that looks like / and in the downward direction
 
+    // Diagonal that looks like / and in the downward direction
     for (int dcol = 1; dcol < 8; dcol++) {
         // Horizontal Moves Left
         if (inBounds(let-dcol, num-dcol) && (_board[let-dcol][num-dcol].piece == EMPTY || (_board[let-dcol][num-dcol].piece != EMPTY && _board[let-dcol][num-dcol].iswhite != isWhite))) {
@@ -246,9 +262,7 @@ std::set<board::move> board::bishopMove(int let, int num, bool isWhite) {
         }
     }
 
-    // NOTE:
     // Diagonal that looks like \ in the upward direction
-
     for (int drow = 1; drow < 8; drow++) {
         if (inBounds(let-drow, num+drow) && (_board[let-drow][num+drow].piece == EMPTY || (_board[let-drow][num+drow].piece != EMPTY && _board[let-drow][num+drow].iswhite != isWhite))) {
             // Check if the piece is in bounds, and that the square is either empty or an opposing piece
@@ -283,7 +297,9 @@ std::set<board::move> board::bishopMove(int let, int num, bool isWhite) {
     return ret;
 }
 
-// Note: This method generates raw moves and does not check for the move to be in bounds
+// Calculates possibles moves for a king at a position (let, num) with color isWhite
+// Note: This method generates raw moves and does not check for the move to be not in check (handled
+// by the minimax engine)
 std::set<board::move> board::kingMove(int let, int num, bool isWhite, bool canCastle) {
     set<board::move> ret;
     for (int plusl = -1; plusl <= 1; plusl++) {
@@ -311,6 +327,7 @@ std::set<board::move> board::kingMove(int let, int num, bool isWhite, bool canCa
     return ret;
 }
 
+// Calculates possibles moves for a queen at a position (let, num) with color isWhite
 std::set<board::move> board::queenMove(int let, int num, bool isWhite) {
     set<board::move> ret;
     // We can "cheat" and compose all of the queen moves as a combination of the rook moves and bishop moves
@@ -330,6 +347,7 @@ std::set<board::move> board::queenMove(int let, int num, bool isWhite) {
     return ret;
 }
 
+// Calculates possibles moves for a rook at a position (let, num) with color isWhite
 std::set<board::move> board::rookMove(int let, int num, bool isWhite) {
     set<board::move> ret;
     for (int dcol = 1; dcol < 8; dcol++) {
@@ -433,6 +451,7 @@ bool board::confirmNoKingProblems(bool isWhite, board::move mo) {
     return true;
 }
 
+// Prints in a human-readable format to the console
 void board::ToString() {
     for (int j = 0; j < 8; j++) {
         for (int i = 0; i < 8; i++) {
@@ -453,6 +472,7 @@ long board::generateRandomBitString() {
     return ((long long) rand() << 32) | rand();
 }
 
+// Implements the Zobrist hash table creation
 void board::InitializeHashTable() {
     map<board::piece, int> toPieces = {{{false, board::PAWN},1}, {{false, board::ROOK},2}, {{false, board::KNIGHT},3}, {{false, board::BISHOP},4}, {{false, board::QUEEN},5}, {{false, board::KING},6},
                                        {{false, board::KNIGHT},7}, {{false, board::KNIGHT},8}, {{false, board::KNIGHT},9}, {{false, board::KNIGHT},10}, {{false, board::KNIGHT},11}, {{false, board::KNIGHT},12}};
@@ -466,6 +486,7 @@ void board::InitializeHashTable() {
     board::ZOBRIST_BLACK_MOVE = board::generateRandomBitString();
 }
 
+// gets the FEN hashstring
 std::string board::ToHashString() {
     string s = "                                                                ";
     for (int j = 0; j < 8; j++) {
@@ -480,6 +501,7 @@ std::string board::ToHashString() {
     return s;
 }
 
+// gets the zobrist hash number
 long board::ZobristKey() {
 //     Uses the Zobrist Algorithm to Hash
 //     https://en.wikipedia.org/wiki/Zobrist_hashing
@@ -505,6 +527,7 @@ long board::ZobristKey() {
         return h;
 }
 
+// counts the number of moves made
 int board::movesMade() {
     return this->performedMovesStack.size();
 }

@@ -81,7 +81,7 @@ void game::evaluateGame() {
             evaluation.push_back(0);
         }
         else {
-            engine::moveoption op = engine::bestmove(b);
+            engine::moveoption op = engine::bestmove(b, TACTIC_MAX_DEPTH);
             b->ToString();
             evaluation.push_back(op.evaluation);
             std::cout << op.m.toString() << std::endl;
