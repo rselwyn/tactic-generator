@@ -21,7 +21,6 @@
 // https://en.wikipedia.org/wiki/Minimax
 
 double engine::kConsidered = 0;
-double engine::kGlobalAlpha = 0;
 
 // Positive evaluation is an advantage for white
 double engine::evalb(board *b) {
@@ -76,7 +75,7 @@ engine::moveoption engine::bestmove(board* b) {
     std::unordered_map<long, std::pair<double, int>> *table = new std::unordered_map<long, std::pair<double, int>>;
     // evaluate first n, get results back, and feed those as alphas for the new things
     for (int range = 0; range < moves.size(); range+=5) {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < EVAL_THREADS; i++) {
             int index = (range + i);
             std::cout << "Spawning " << index << std::endl;
             if (index >= moves.size()) break;
@@ -95,25 +94,18 @@ engine::moveoption engine::bestmove(board* b) {
             copies[index] = args;
             pthread_create(&eval_threads[index], NULL, dispatch_minimax, (void*) args);
         }
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < EVAL_THREADS; i++) {
             int index = (range + i);
             if (index >= moves.size()) break;
             pthread_join(eval_threads[index], NULL);
-            std::cout << "Joined thread " << index << std::endl;
             std::cout << extreme_value[index] << std::endl;
 
             if (!b->sideToMove) {
-                std::cout << "alpha " << alpha << std::endl;
                 alpha = std::max(alpha, extreme_value[index]);
-                std::cout << "alpha " << alpha << std::endl;
 
             }
             else {
-                std::cout << "beta " << beta << std::endl;
-
                 beta = std::min(beta, extreme_value[index]);
-                std::cout << "beta " << beta << std::endl;
-
             }
         }
     }

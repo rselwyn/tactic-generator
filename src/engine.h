@@ -7,7 +7,6 @@
 class engine {
     public:
         static double kConsidered;
-        static double kGlobalAlpha;
 
         struct moveoption {
             double evaluation;

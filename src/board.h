@@ -6,6 +6,7 @@
 #include <map>
 #include <stack>
 #include <set>
+#include <vector>
 #include <unordered_map>
 
 class board
