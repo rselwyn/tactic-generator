@@ -74,10 +74,9 @@ engine::moveoption engine::bestmove(board* b) {
     board::minimax_args* copies[moves.size()];
     std::unordered_map<long, std::pair<double, int>> *table = new std::unordered_map<long, std::pair<double, int>>;
     // evaluate first n, get results back, and feed those as alphas for the new things
-    for (int range = 0; range < moves.size(); range+=5) {
+    for (int range = 0; range < moves.size(); range+=EVAL_THREADS) {
         for (int i = 0; i < EVAL_THREADS; i++) {
             int index = (range + i);
-            std::cout << "Spawning " << index << std::endl;
             if (index >= moves.size()) break;
 
             board *copy = new board;
@@ -98,8 +97,6 @@ engine::moveoption engine::bestmove(board* b) {
             int index = (range + i);
             if (index >= moves.size()) break;
             pthread_join(eval_threads[index], NULL);
-            std::cout << extreme_value[index] << std::endl;
-
             if (!b->sideToMove) {
                 alpha = std::max(alpha, extreme_value[index]);
 

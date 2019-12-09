@@ -12,11 +12,11 @@
 #include <vector>
 
 const std::string TACTIC_FILE_EXT = "processed/";
-const std::vector<std::string> TACTIC_FILES = {"lichess.epgn"};
+const std::vector<std::string> TACTIC_FILES = {"lichess.epgn", "second.epgn"};
 const int DONT_EVALUATE_FIRST_N = 11; // Don't evaluate the first 10 moves for tactics because
                                       // they aren't that interesting.
 
-const double RAPID_TRANSITION_EVAL = 2.5; // in Pawn Values
+const double RAPID_TRANSITION_EVAL = 2.95; // in Pawn Values
                                        // essentially, if a move is bad enough that your position is 2 pawns worse as a result of something
 const double TACTIC_IS_OVER = 200;
 class game

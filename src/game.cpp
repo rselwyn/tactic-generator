@@ -77,14 +77,16 @@ void game::evaluateGame() {
     int i = 1;
     for (std::string move : moveOrder) {
         int moveNumber = (++i)/2;
-        b->MakeMove(move);
         if (moveNumber < DONT_EVALUATE_FIRST_N) {
             evaluation.push_back(0);
         }
         else {
             engine::moveoption op = engine::bestmove(b);
+            b->ToString();
             evaluation.push_back(op.evaluation);
+            std::cout << op.m.toString() << std::endl;
         }
+        b->MakeMove(move);
         std::cout << "Evaluated move " << moveNumber  << std::endl;
     }
 }

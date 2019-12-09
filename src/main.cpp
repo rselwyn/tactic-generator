@@ -104,8 +104,11 @@ void playAgainstTactic(display &d) {
     d.ChangePromptText("Analyzing...Check console");
     d.ChangeResponseMove(" for progress.");
     d.DisplaySidebar();
-
-    game* attempt = tact[randomInteger(0,tact.size() - 1)];
+    int index = randomInteger(0, tact.size());
+    cout << index << endl;
+    cout << tact.size() << endl;
+    getLine();
+    game* attempt = tact[index];
     attempt->evaluateGame();
     attempt->csvEvaluation();
     int scan = attempt->ScanForTactic();
@@ -153,8 +156,32 @@ void playAgainstTactic(display &d) {
         d.ChangeResponseMove("Engine Played " + option.m.toString());
         d.DisplaySidebar();
         d.ShowBoard(attempt->b);
-
     }
+}
+
+
+void difficulty(display &d) {
+    // Unfortunately, the other two parts of the project proved to be a pretty massive commitment.  While I was able
+    // to develop an algorithm for this part of the project, I was unable to write all of the code required to
+    // run it.
+
+    // In the somewhat miniscule field of programmatically evaluate chess tactics, this is a relatively unexplored
+    // subquestion (classifying the *type* of tactics is a well known problem, but this problem of evaluating
+    // the difficulty is pretty much unexplored).  That being said, I am content with the algorithm.
+
+    /**
+      Algorithm Explanation:
+        Intuition: Tactics are difficult because of breadth and depth (number of moves to consider and how deep to look)
+        1. Calculate the best possible move using the maximum analysis depth of your engine (in this case, 7).
+        3. Initialize a difficulty number to be 0.
+        2. For each i in [1...7]:
+            3. Initialize count = 0
+            4. Evaluate each possible move at the depth of i.
+                5. If the move is "close" (some constant that is like the value of 2 pawns) to or greater
+                than the absolute best move calculated in step 1, add one to the count.
+            5. Add to the difficulty number the value of (count * i)
+        6. return difficulty number
+      */
 }
 
 int main() {
@@ -166,7 +193,7 @@ int main() {
     board::InitializeHashTable();
 
     while (true) {
-        std::string option = getLine("Enter the number for your desired mode.\n  "
+        std::string option = getLine("Enter the number for your desired mode.\n"
                                      "1: Play The Engine. \n2: Play a Tactic. \n3: Numerical Tactical Difficulty Evaluation");
         if (option == "1") {
             humanVsEngine(d);

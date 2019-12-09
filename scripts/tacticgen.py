@@ -5,8 +5,11 @@ import chess.pgn
 
 # Program turns PGN files into files that can easily be read by the c++ software
 raw = os.listdir("raw/")
+print raw
 for file_ext in raw:
-    f = open("raw/" + file_ext, "r")
+    if file_ext == ".DS_Store":
+        continue
+    f = open("raw/" + file_ext)
     games = []
     while True:
         pgn = chess.pgn.read_game(f)
